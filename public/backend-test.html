@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+        .credentials {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Backend API Test Page</h1>
+        
+        <div class="credentials">
+            <h3>📝 Default Login Credentials</h3>
+            <p><strong>Admin:</strong> admin@praktik.com / admin123</p>
+            <p><strong>Test User:</strong> test@praktik.com / test123</p>
+        </div>
+
+        <div class="section info">
+            <h3>🔍 Health Check</h3>
+            <button onclick="checkHealth()">Test Backend Health</button>
+            <div id="healthResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>🔐 Authentication</h3>
+            <div>
+                <h4>Register New User</h4>
+                <input type="email" id="regEmail" placeholder="Email" value="newuser@test.com">
+                <input type="password" id="regPassword" placeholder="Password" value="password123">
+                <input type="text" id="regFirstname" placeholder="First Name" value="New">
+                <input type="text" id="regLastname" placeholder="Last Name" value="User">
+                <button onclick="register()">Register</button>
+            </div>
+            
+            <div>
+                <h4>Login</h4>
+                <input type="email" id="loginEmail" placeholder="Email" value="test@praktik.com">
+                <input type="password" id="loginPassword" placeholder="Password" value="test123">
+                <button onclick="login()">Login</button>
+                <button onclick="logout()">Logout</button>
+            </div>
+            <div id="authResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>📚 Blog Posts</h3>
+            <button onclick="getBlogPosts()">Get All Blog Posts</button>
+            <button onclick="createBlogPost()">Create Test Post</button>
+            <div id="blogResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>👥 Contacts</h3>
+            <button onclick="getContacts()">Get All Contacts</button>
+            <button onclick="createContact()">Create Test Contact</button>
+            <div id="contactResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>👤 Users</h3>
+            <button onclick="getUsers()">Get All Users</button>
+            <button onclick="getUserProfile()">Get My Profile</button>
+            <div id="userResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>📊 Response</h3>
+            <pre id="response"></pre>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+        let token = localStorage.getItem('token');
+
+        function updateResponse(data, success = true) {
+            const responseEl = document.getElementById('response');
+            responseEl.textContent = JSON.stringify(data, null, 2);
+            responseEl.className = success ? 'success' : 'error';
+        }
+
+        function getHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            return headers;
+        }
+
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            try {
+                const config = {
+                    method,
+                    headers: getHeaders()
+                };
+                
+                if (body) {
+                    config.body = JSON.stringify(body);
+                }
+
+                const response = await fetch(`${API_BASE}${endpoint}`, config);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(`${response.status}: ${data.error || data.message}`);
+                }
+                
+                updateResponse(data, true);
+                return data;
+            } catch (error) {
+                updateResponse({ error: error.message }, false);
+                throw error;
+            }
+        }
+
+        async function checkHealth() {
+            try {
+                const response = await fetch('http://localhost:3001/health');
+                const data = await response.json();
+                document.getElementById('healthResult').innerHTML = 
+                    `<div class="success">✅ Backend is running! Status: ${data.status}</div>`;
+                updateResponse(data, true);
+            } catch (error) {
+                document.getElementById('healthResult').innerHTML = 
+                    `<div class="error">❌ Backend not accessible: ${error.message}</div>`;
+                updateResponse({ error: error.message }, false);
+            }
+        }
+
+        async function register() {
+            const userData = {
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value,
+                firstname: document.getElementById('regFirstname').value,
+                lastname: document.getElementById('regLastname').value
+            };
+            
+            try {
+                const data = await apiCall('/auth/register', 'POST', userData);
+                token = data.token;
+                localStorage.setItem('token', token);
+                document.getElementById('authResult').innerHTML = 
+                    `<div class="success">✅ Registration successful! Token saved.</div>`;
+            } catch (error) {
+                document.getElementById('authResult').innerHTML = 
+                    `<div class="error">❌ Registration failed: ${error.message}</div>`;
+            }
+        }
+
+        async function login() {
+            const credentials = {
+                email: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            };
+            
+            try {
+                const data = await apiCall('/auth/login', 'POST', credentials);
+                token = data.token;
+                localStorage.setItem('token', token);
+                document.getElementById('authResult').innerHTML = 
+                    `<div class="success">✅ Login successful! Welcome ${data.user.firstname}!</div>`;
+            } catch (error) {
+                document.getElementById('authResult').innerHTML = 
+                    `<div class="error">❌ Login failed: ${error.message}</div>`;
+            }
+        }
+
+        function logout() {
+            token = null;
+            localStorage.removeItem('token');
+            document.getElementById('authResult').innerHTML = 
+                `<div class="info">ℹ️ Logged out successfully!</div>`;
+        }
+
+        async function getBlogPosts() {
+            try {
+                const data = await apiCall('/blog/posts');
+                document.getElementById('blogResult').innerHTML = 
+                    `<div class="success">✅ Found ${data.length} blog posts</div>`;
+            } catch (error) {
+                document.getElementById('blogResult').innerHTML = 
+                    `<div class="error">❌ Failed to get blog posts: ${error.message}</div>`;
+            }
+        }
+
+        async function createBlogPost() {
+            const postData = {
+                title: 'Test Blog Post',
+                content: 'This is a test blog post created from the API test page.',
+                category: 'Technology'
+            };
+            
+            try {
+                const data = await apiCall('/blog/posts', 'POST', postData);
+                document.getElementById('blogResult').innerHTML = 
+                    `<div class="success">✅ Blog post created with ID: ${data.id}</div>`;
+            } catch (error) {
+                document.getElementById('blogResult').innerHTML = 
+                    `<div class="error">❌ Failed to create blog post: ${error.message}</div>`;
+            }
+        }
+
+        async function getContacts() {
+            try {
+                const data = await apiCall('/contacts');
+                document.getElementById('contactResult').innerHTML = 
+                    `<div class="success">✅ Found ${data.length} contacts</div>`;
+            } catch (error) {
+                document.getElementById('contactResult').innerHTML = 
+                    `<div class="error">❌ Failed to get contacts: ${error.message}</div>`;
+            }
+        }
+
+        async function createContact() {
+            const contactData = {
+                firstname: 'Test',
+                lastname: 'Contact',
+                email: 'test.contact@example.com',
+                phone: '123-456-7890',
+                company: 'Test Company'
+            };
+            
+            try {
+                const data = await apiCall('/contacts', 'POST', contactData);
+                document.getElementById('contactResult').innerHTML = 
+                    `<div class="success">✅ Contact created with ID: ${data.id}</div>`;
+            } catch (error) {
+                document.getElementById('contactResult').innerHTML = 
+                    `<div class="error">❌ Failed to create contact: ${error.message}</div>`;
+            }
+        }
+
+        async function getUsers() {
+            try {
+                const data = await apiCall('/users');
+                document.getElementById('userResult').innerHTML = 
+                    `<div class="success">✅ Found ${data.length} users</div>`;
+            } catch (error) {
+                document.getElementById('userResult').innerHTML = 
+                    `<div class="error">❌ Failed to get users: ${error.message}</div>`;
+            }
+        }
+
+        async function getUserProfile() {
+            try {
+                const data = await apiCall('/users/profile');
+                document.getElementById('userResult').innerHTML = 
+                    `<div class="success">✅ Profile loaded for: ${data.firstname} ${data.lastname}</div>`;
+            } catch (error) {
+                document.getElementById('userResult').innerHTML = 
+                    `<div class="error">❌ Failed to get profile: ${error.message}</div>`;
+            }
+        }
+
+        // Check if user is already logged in
+        if (token) {
+            document.getElementById('authResult').innerHTML = 
+                `<div class="info">ℹ️ Already logged in with token</div>`;
+        }
+
+        // Auto-check health on load
+        checkHealth();
+    </script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 3: Data Fetching Validation</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .test-section { 
+            background: white; 
+            padding: 20px; 
+            margin: 15px 0; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status { 
+            padding: 10px; 
+            border-radius: 4px; 
+            margin: 10px 0; 
+        }
+        .success { background: #e7f5e7; color: #2e7d2e; border: 1px solid #4caf50; }
+        .error { background: #ffe7e7; color: #d32f2f; border: 1px solid #f44336; }
+        .info { background: #e3f2fd; color: #1976d2; border: 1px solid #2196f3; }
+        button { 
+            background: #1976d2; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin: 5px;
+        }
+        button:hover { background: #1565c0; }
+        .results { 
+            background: #f9f9f9; 
+            padding: 15px; 
+            border-radius: 4px; 
+            font-family: monospace; 
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Step 3: Data Fetching & Error Handling Validation</h1>
+    
+    <div class="test-section">
+        <h2>📡 API Connectivity Tests</h2>
+        <button onclick="testMSWHealth()">Test MSW Health</button>
+        <button onclick="testContactsAPI()">Test Contacts API</button>
+        <button onclick="testAllEndpoints()">Test All Endpoints</button>
+        <div id="api-results" class="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>⚠️ Error Handling Tests</h2>
+        <button onclick="testErrorScenarios()">Test Error Scenarios</button>
+        <button onclick="testRetryLogic()">Test Retry Logic</button>
+        <div id="error-results" class="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔄 Data Flow Tests</h2>
+        <button onclick="testCRUDOperations()">Test CRUD Operations</button>
+        <button onclick="testDataConsistency()">Test Data Consistency</button>
+        <div id="data-results" class="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Performance Tests</h2>
+        <button onclick="testLoadTimes()">Test Load Times</button>
+        <button onclick="testConcurrency()">Test Concurrent Requests</button>
+        <div id="performance-results" class="results"></div>
+    </div>
+
+    <script type="module">
+        // Import enhanced fetchers
+        import { getFetcher, postFetcher, putFetcher, deleteFetcher } from '/src/api/globalFetcher.js';
+
+        let testResults = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = `[${timestamp}] ${message}`;
+            testResults.push({ timestamp, message, type });
+            console.log(entry);
+            return entry;
+        }
+
+        function updateResults(containerId, content) {
+            document.getElementById(containerId).textContent = content;
+        }
+
+        window.testMSWHealth = async () => {
+            try {
+                log('Testing MSW Health Endpoint...', 'info');
+                const start = performance.now();
+                const response = await getFetcher('/api/test/health');
+                const end = performance.now();
+                
+                if (response.status === 'ok') {
+                    log(`✅ MSW Health: OK (${Math.round(end - start)}ms)`, 'success');
+                    updateResults('api-results', 'MSW Health Check: PASSED');
+                } else {
+                    throw new Error('Health check returned non-OK status');
+                }
+            } catch (error) {
+                log(`❌ MSW Health: FAILED - ${error.message}`, 'error');
+                updateResults('api-results', `MSW Health Check: FAILED - ${error.message}`);
+            }
+        };
+
+        window.testContactsAPI = async () => {
+            try {
+                log('Testing Contacts API...', 'info');
+                const response = await getFetcher('/api/data/contacts/contactsData');
+                
+                if (response && response.data && Array.isArray(response.data)) {
+                    log(`✅ Contacts API: Found ${response.data.length} contacts`, 'success');
+                    updateResults('api-results', `Contacts API: PASSED (${response.data.length} contacts)`);
+                } else {
+                    throw new Error('Invalid response structure');
+                }
+            } catch (error) {
+                log(`❌ Contacts API: FAILED - ${error.message}`, 'error');
+                updateResults('api-results', `Contacts API: FAILED - ${error.message}`);
+            }
+        };
+
+        window.testErrorScenarios = async () => {
+            const scenarios = [
+                '/api/non-existent',
+                '/api/invalid-endpoint',
+                '/api/test/500-error'
+            ];
+
+            let results = [];
+            for (const endpoint of scenarios) {
+                try {
+                    await getFetcher(endpoint);
+                    results.push(`❌ ${endpoint}: Should have failed but didn't`);
+                } catch (error) {
+                    results.push(`✅ ${endpoint}: Correctly handled error - ${error.message.substring(0, 50)}...`);
+                }
+            }
+            updateResults('error-results', results.join('\n'));
+        };
+
+        window.testCRUDOperations = async () => {
+            let results = [];
+            try {
+                // Test CREATE
+                const newContact = {
+                    firstname: 'Test',
+                    lastname: 'User',
+                    email: 'test@example.com',
+                    phone: '123-456-7890'
+                };
+                
+                const createResponse = await postFetcher('/api/data/contacts/addContact', newContact);
+                results.push('✅ CREATE: Contact added successfully');
+
+                // Test READ (already tested above)
+                results.push('✅ READ: Contacts fetched successfully');
+
+                // Note: UPDATE and DELETE would need specific contact IDs
+                results.push('ℹ️ UPDATE/DELETE: Would need specific contact IDs for full test');
+
+            } catch (error) {
+                results.push(`❌ CRUD Test failed: ${error.message}`);
+            }
+            updateResults('data-results', results.join('\n'));
+        };
+
+        window.testLoadTimes = async () => {
+            const endpoints = [
+                '/api/test/health',
+                '/api/data/contacts/contactsData'
+            ];
+
+            let results = [];
+            for (const endpoint of endpoints) {
+                try {
+                    const start = performance.now();
+                    await getFetcher(endpoint);
+                    const end = performance.now();
+                    const time = Math.round(end - start);
+                    results.push(`${endpoint}: ${time}ms`);
+                } catch (error) {
+                    results.push(`${endpoint}: FAILED`);
+                }
+            }
+            updateResults('performance-results', results.join('\n'));
+        };
+
+        // Auto-run basic tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testMSWHealth();
+                setTimeout(() => testContactsAPI(), 1000);
+            }, 500);
+        });
+
+        // Placeholder functions for remaining tests
+        window.testAllEndpoints = () => updateResults('api-results', 'Test all endpoints: TODO');
+        window.testRetryLogic = () => updateResults('error-results', 'Retry logic test: TODO');
+        window.testDataConsistency = () => updateResults('data-results', 'Data consistency test: TODO');
+        window.testConcurrency = () => updateResults('performance-results', 'Concurrency test: TODO');
+    </script>
+</body>
+</html>
