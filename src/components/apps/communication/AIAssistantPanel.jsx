@@ -1,564 +1,481 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
+  Grid,
   Card,
   CardContent,
-  CardHeader,
   Typography,
-  TextField,
   Button,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  ListItemSecondaryAction,
-  Avatar,
+  TextField,
   Chip,
   IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Fab,
-  Collapse,
-  Alert,
-  CircularProgress,
-  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  Avatar,
+  LinearProgress,
   Divider,
-  Stack,
-  useTheme
+  Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Switch,
+  FormControlLabel
 } from '@mui/material';
 import {
   SmartToy,
-  Send,
-  Mic,
-  MicOff,
-  Schedule,
-  NotificationAdd,
-  AutoAwesome,
   Psychology,
-  TrendingUp,
   Lightbulb,
-  Assignment,
-  Event,
-  Close,
+  Schedule,
+  TrendingUp,
   Add,
+  Edit,
+  Delete,
   CheckCircle,
   Warning,
   Info,
-  Error
+  Settings,
+  Refresh,
+  Chat,
+  Analytics
 } from '@mui/icons-material';
-import { format, addDays, addHours, parseISO } from 'date-fns';
-import { sv } from 'date-fns/locale';
-
-import { useCommunication } from '@/context/CommunicationContext';
-import SmartNotificationsManager from './SmartNotificationsManager';
+import { useCommunication } from '../../../context/CommunicationContext';
 
 const AIAssistantPanel = () => {
-  const theme = useTheme();
-  const { aiAssistant, createAIReminder, analyzeWorkflow, getAISuggestions } = useCommunication();
+  const { t } = useTranslation();
+  const {
+    aiAssistant,
+    createAIReminder,
+    analyzeWorkflow,
+    getAISuggestions,
+    generateSmartNotification
+  } = useCommunication();
   
-  // Chat states
-  const [chatMessages, setChatMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  
-  // AI features states
-  const [reminders, setReminders] = useState([]);
-  const [suggestions, setSuggestions] = useState([]);
-  const [workflowAnalysis, setWorkflowAnalysis] = useState(null);
-  const [showReminderDialog, setShowReminderDialog] = useState(false);
-  const [newReminder, setNewReminder] = useState({
+  const [openReminderDialog, setOpenReminderDialog] = useState(false);
+  const [openSettingsDialog, setOpenSettingsDialog] = useState(false);
+  const [reminderForm, setReminderForm] = useState({
     title: '',
     description: '',
     dueDate: '',
-    priority: 'medium',
-    category: 'general'
+    priority: 'medium'
   });
-  
-  const chatRef = useRef(null);
-  const recognition = useRef(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
 
-  // Initialize AI assistant on component mount
-  useEffect(() => {
-    loadAIData();
-    initializeSpeechRecognition();
-    
-    // Add welcome message
-    setChatMessages([{
-      id: 1,
-      type: 'ai',
-      content: 'Hej! Jag är din AI-assistent. Jag kan hjälpa dig med påminnelser, analysera ditt arbetsflöde och ge smarta förslag. Vad kan jag hjälpa dig med?',
-      timestamp: new Date(),
-      suggestions: [
-        'Skapa en påminnelse',
-        'Analysera mitt arbetsflöde',
-        'Visa dagens uppgifter',
-        'Ge mig förslag för förbättringar'
-      ]
-    }]);
-  }, []);
+  const handleCreateReminder = async () => {
+    if (!reminderForm.title.trim()) return;
 
-  const loadAIData = async () => {
-    try {
-      // Load existing reminders and suggestions
-      const aiData = await aiAssistant.loadData();
-      setReminders(aiData.reminders || []);
-      setSuggestions(aiData.suggestions || []);
-      setWorkflowAnalysis(aiData.workflowAnalysis);
-    } catch (error) {
-      console.error('Failed to load AI data:', error);
-    }
-  };
-
-  const initializeSpeechRecognition = () => {
-    if ('webkitSpeechRecognition' in window) {
-      recognition.current = new window.webkitSpeechRecognition();
-      recognition.current.continuous = false;
-      recognition.current.interimResults = false;
-      recognition.current.lang = 'sv-SE';
-      
-      recognition.current.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setInputMessage(transcript);
-        setIsListening(false);
-      };
-      
-      recognition.current.onerror = () => {
-        setIsListening(false);
-      };
-    }
-  };
-
-  const toggleSpeechRecognition = () => {
-    if (!recognition.current) return;
-    
-    if (isListening) {
-      recognition.current.stop();
-      setIsListening(false);
-    } else {
-      recognition.current.start();
-      setIsListening(true);
-    }
-  };
-
-  const sendMessage = async () => {
-    if (!inputMessage.trim()) return;
-
-    const userMessage = {
-      id: Date.now(),
-      type: 'user',
-      content: inputMessage,
-      timestamp: new Date()
-    };
-
-    setChatMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
-    setIsTyping(true);
-
-    try {
-      // Simulate AI processing
-      const aiResponse = await processAIMessage(inputMessage);
-      
-      setTimeout(() => {
-        const aiMessage = {
-          id: Date.now() + 1,
-          type: 'ai',
-          content: aiResponse.content,
-          timestamp: new Date(),
-          actions: aiResponse.actions,
-          suggestions: aiResponse.suggestions
-        };
-        
-        setChatMessages(prev => [...prev, aiMessage]);
-        setIsTyping(false);
-        
-        // Execute any actions
-        if (aiResponse.actions) {
-          executeAIActions(aiResponse.actions);
-        }
-      }, 1500);
-      
-    } catch (error) {
-      setIsTyping(false);
-      const errorMessage = {
-        id: Date.now() + 1,
-        type: 'ai',
-        content: 'Ursäkta, jag kunde inte bearbeta din begäran just nu. Försök igen senare.',
-        timestamp: new Date(),
-        isError: true
-      };
-      setChatMessages(prev => [...prev, errorMessage]);
-    }
-  };
-
-  const processAIMessage = async (message) => {
-    const lowerMessage = message.toLowerCase();
-    
-    // Smart reminder creation
-    if (lowerMessage.includes('påminnelse') || lowerMessage.includes('reminder')) {
-      return {
-        content: 'Jag hjälper dig skapa en påminnelse. Vad vill du bli påmind om och när?',
-        actions: ['show_reminder_dialog'],
-        suggestions: ['Imorgon kl 09:00', 'Nästa vecka', 'Om en timme', 'Anpassad tid']
-      };
-    }
-    
-    // Workflow analysis
-    if (lowerMessage.includes('analysera') || lowerMessage.includes('arbetsflöde') || lowerMessage.includes('workflow')) {
-      const analysis = await analyzeWorkflow();
-      return {
-        content: `Baserat på din aktivitet de senaste dagarna har jag analyserat ditt arbetsflöde:\n\n${analysis.summary}\n\nVill du se detaljerade förslag för förbättringar?`,
-        actions: ['show_workflow_analysis'],
-        suggestions: ['Visa förslag', 'Skapa handlingsplan', 'Exportera rapport']
-      };
-    }
-    
-    // Daily tasks and schedule
-    if (lowerMessage.includes('dagens') || lowerMessage.includes('idag') || lowerMessage.includes('schema')) {
-      return {
-        content: 'Här är din översikt för idag:\n• 3 möten planerade\n• 5 olästa notifieringar\n• 2 påminnelser\n• 1 deadline imorgon\n\nVill du att jag prioriterar dina uppgifter?',
-        suggestions: ['Prioritera uppgifter', 'Visa kalendern', 'Skapa påminnelse', 'Planera dagen']
-      };
-    }
-    
-    // Smart suggestions
-    if (lowerMessage.includes('förslag') || lowerMessage.includes('tips') || lowerMessage.includes('förbättra')) {
-      const suggestions = await getAISuggestions();
-      return {
-        content: `Här är mina smarta förslag baserat på dina mönster:\n\n${suggestions.map(s => `• ${s.title}: ${s.description}`).join('\n')}\n\nVill du implementera något av dessa?`,
-        suggestions: suggestions.map(s => s.title)
-      };
-    }
-    
-    // Default response
-    return {
-      content: 'Jag förstår. Jag kan hjälpa dig med:\n• Skapa smarta påminnelser\n• Analysera ditt arbetsflöde\n• Ge personliga förslag\n• Planera din dag\n• Organisera uppgifter\n\nVad vill du börja med?',
-      suggestions: ['Skapa påminnelse', 'Analysera arbetsflöde', 'Visa förslag', 'Planera dagen']
-    };
-  };
-
-  const executeAIActions = (actions) => {
-    actions.forEach(action => {
-      switch (action) {
-        case 'show_reminder_dialog':
-          setShowReminderDialog(true);
-          break;
-        case 'show_workflow_analysis':
-          // Could open a detailed analysis view
-          break;
-        default:
-          break;
-      }
+    await createAIReminder(reminderForm);
+    setReminderForm({
+      title: '',
+      description: '',
+      dueDate: '',
+      priority: 'medium'
     });
+    setOpenReminderDialog(false);
   };
 
-  const handleSuggestionClick = (suggestion) => {
-    setInputMessage(suggestion);
-    sendMessage();
+  const handleAnalyzeWorkflow = async () => {
+    setIsAnalyzing(true);
+    await analyzeWorkflow();
+    setIsAnalyzing(false);
   };
 
-  const createReminder = async () => {
-    try {
-      const reminder = await createAIReminder(newReminder);
-      setReminders(prev => [...prev, reminder]);
-      setShowReminderDialog(false);
-      setNewReminder({
-        title: '',
-        description: '',
-        dueDate: '',
-        priority: 'medium',
-        category: 'general'
-      });
-      
-      // Add confirmation message to chat
-      const confirmMessage = {
-        id: Date.now(),
-        type: 'ai',
-        content: `Påminnelse skapad! Jag kommer påminna dig om "${reminder.title}" ${format(new Date(reminder.dueDate), 'PPP', { locale: sv })}.`,
-        timestamp: new Date()
-      };
-      setChatMessages(prev => [...prev, confirmMessage]);
-      
-    } catch (error) {
-      console.error('Failed to create reminder:', error);
-    }
+  const handleGetSuggestions = async () => {
+    setIsLoadingSuggestions(true);
+    await getAISuggestions();
+    setIsLoadingSuggestions(false);
   };
 
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'high': return 'error';
       case 'medium': return 'warning';
-      case 'low': return 'info';
+      case 'low': return 'success';
       default: return 'default';
     }
   };
 
-  const getCategoryIcon = (category) => {
-    switch (category) {
-      case 'meeting': return <Event />;
-      case 'deadline': return <Assignment />;
-      case 'personal': return <Person />;
-      default: return <Schedule />;
+  const getImpactIcon = (impact) => {
+    switch (impact) {
+      case 'high': return <TrendingUp color="success" />;
+      case 'medium': return <Info color="info" />;
+      case 'low': return <Warning color="warning" />;
+      default: return <Info />;
     }
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {/* AI Assistant Header */}
-      <Card>
-        <CardHeader
-          avatar={
-            <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
-              <SmartToy />
-            </Avatar>
-          }
-          title="AI-Assistent"
-          subheader="Din smarta kommunikationspartner"
-          action={
-            <Chip
-              icon={<AutoAwesome />}
-              label="Aktiv"
-              color="primary"
-              variant="outlined"
-            />
-          }
-        />
-      </Card>
-
-      {/* Smart Notifications Manager */}
-      <SmartNotificationsManager />
-
-      {/* Active Reminders */}
-      {reminders.length > 0 && (
-        <Card>
-          <CardHeader
-            title="Aktiva Påminnelser"
-            subheader={`${reminders.length} påminnelser`}
-            avatar={<Schedule color="primary" />}
-          />
-          <CardContent sx={{ pt: 0 }}>
-            <List dense>
-              {reminders.slice(0, 3).map((reminder) => (
-                <ListItem key={reminder.id}>
-                  <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: theme.palette[getPriorityColor(reminder.priority)].main }}>
-                      {getCategoryIcon(reminder.category)}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={reminder.title}
-                    secondary={`${format(new Date(reminder.dueDate), 'PPp', { locale: sv })} • ${reminder.category}`}
-                  />
-                  <ListItemSecondaryAction>
-                    <Chip
-                      label={reminder.priority}
-                      color={getPriorityColor(reminder.priority)}
-                      size="small"
-                    />
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
-            </List>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Chat Interface */}
-      <Card sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <CardHeader
-          title="AI-Chat"
-          subheader="Prata med din assistent"
-          action={
-            <IconButton onClick={toggleSpeechRecognition} color={isListening ? "error" : "default"}>
-              {isListening ? <MicOff /> : <Mic />}
-            </IconButton>
-          }
-        />
-        
-        {/* Messages */}
-        <CardContent sx={{ flex: 1, overflow: 'auto' }} ref={chatRef}>
-          <List>
-            {chatMessages.map((message) => (
-              <ListItem key={message.id} sx={{ 
-                flexDirection: 'column', 
-                alignItems: message.type === 'user' ? 'flex-end' : 'flex-start',
-                mb: 1
-              }}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    maxWidth: '80%',
-                    bgcolor: message.type === 'user' 
-                      ? theme.palette.primary.main 
-                      : message.isError 
-                        ? theme.palette.error.main 
-                        : theme.palette.grey[100],
-                    color: message.type === 'user' || message.isError ? 'white' : 'text.primary'
-                  }}
-                >
-                  <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
-                    {message.content}
-                  </Typography>
-                  
-                  {/* AI Suggestions */}
-                  {message.suggestions && (
-                    <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', gap: 1 }}>
-                      {message.suggestions.map((suggestion, index) => (
-                        <Chip
-                          key={index}
-                          label={suggestion}
-                          size="small"
-                          variant="outlined"
-                          onClick={() => handleSuggestionClick(suggestion)}
-                          sx={{ 
-                            color: message.type === 'user' ? 'white' : 'primary.main',
-                            borderColor: message.type === 'user' ? 'white' : 'primary.main'
-                          }}
-                        />
-                      ))}
-                    </Stack>
-                  )}
-                </Paper>
-                
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
-                  {format(message.timestamp, 'HH:mm', { locale: sv })}
-                </Typography>
-              </ListItem>
-            ))}
-            
-            {/* Typing indicator */}
-            {isTyping && (
-              <ListItem sx={{ alignItems: 'flex-start' }}>
-                <Paper sx={{ p: 2, bgcolor: theme.palette.grey[100] }}>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <CircularProgress size={16} />
-                    <Typography variant="body2" color="text.secondary">
-                      AI-assistenten skriver...
+    <Box sx={{ p: 0 }}>
+      <Grid container spacing={3}>
+        {/* AI Assistant Header */}
+        <Grid item xs={12}>
+          <Card sx={{ 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white'
+          }}>
+            <CardContent>
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}>
+                    <SmartToy />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h5" fontWeight="bold">
+                      AI-Assistent
+                    </Typography>
+                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                      Din smarta partner för produktivitet och automation
                     </Typography>
                   </Box>
-                </Paper>
-              </ListItem>
-            )}
-          </List>
-        </CardContent>
-        
-        {/* Input Area */}
-        <Divider />
-        <Box sx={{ p: 2 }}>
-          <Box display="flex" gap={1}>
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="Skriv ditt meddelande..."
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              size="small"
-            />
-            <Button
-              variant="contained"
-              onClick={sendMessage}
-              disabled={!inputMessage.trim() || isTyping}
-              sx={{ minWidth: 'auto', px: 2 }}
-            >
-              <Send />
-            </Button>
-          </Box>
-        </Box>
-      </Card>
+                </Box>
+                <Box>
+                  <IconButton 
+                    color="inherit" 
+                    onClick={() => setOpenSettingsDialog(true)}
+                    sx={{ mr: 1 }}
+                  >
+                    <Settings />
+                  </IconButton>
+                  <IconButton color="inherit" onClick={handleGetSuggestions}>
+                    <Refresh />
+                  </IconButton>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
 
-      {/* Quick Actions FAB */}
-      <Fab
-        color="primary"
-        sx={{ position: 'fixed', bottom: 16, right: 16 }}
-        onClick={() => setShowReminderDialog(true)}
-      >
-        <Add />
-      </Fab>
+        {/* Quick Actions */}
+        <Grid item xs={12}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Snabbåtgärder
+              </Typography>
+              <Box display="flex" gap={2} flexWrap="wrap">
+                <Button
+                  variant="contained"
+                  startIcon={<Add />}
+                  onClick={() => setOpenReminderDialog(true)}
+                >
+                  Skapa påminnelse
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<Analytics />}
+                  onClick={handleAnalyzeWorkflow}
+                  disabled={isAnalyzing}
+                >
+                  {isAnalyzing ? 'Analyserar...' : 'Analysera arbetsflöde'}
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<Lightbulb />}
+                  onClick={handleGetSuggestions}
+                  disabled={isLoadingSuggestions}
+                >
+                  {isLoadingSuggestions ? 'Hämtar...' : 'Få förslag'}
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<Chat />}
+                  onClick={() => generateSmartNotification({
+                    title: 'Smart påminnelse',
+                    message: 'Din AI-assistent har förslag för dig',
+                    category: 'ai',
+                    priority: 'medium'
+                  })}
+                >
+                  Smart notis
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
 
-      {/* Reminder Creation Dialog */}
-      <Dialog
-        open={showReminderDialog}
-        onClose={() => setShowReminderDialog(false)}
+        {/* Active Reminders */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Box display="flex" alignItems="center" justifyContent="between" mb={2}>
+                <Typography variant="h6">
+                  Aktiva påminnelser ({aiAssistant.reminders.length})
+                </Typography>
+              </Box>
+              
+              {aiAssistant.reminders.length === 0 ? (
+                <Alert severity="info">
+                  Inga aktiva påminnelser. Skapa en ny för att komma igång!
+                </Alert>
+              ) : (
+                <List>
+                  {aiAssistant.reminders.map((reminder) => (
+                    <ListItem key={reminder.id} divider>
+                      <ListItemIcon>
+                        <Schedule color={getPriorityColor(reminder.priority)} />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={reminder.title}
+                        secondary={
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">
+                              {reminder.description}
+                            </Typography>
+                            {reminder.dueDate && (
+                              <Typography variant="caption" color="text.secondary">
+                                Förfaller: {new Date(reminder.dueDate).toLocaleDateString()}
+                              </Typography>
+                            )}
+                          </Box>
+                        }
+                      />
+                      <ListItemSecondaryAction>
+                        <Chip 
+                          label={reminder.priority} 
+                          size="small" 
+                          color={getPriorityColor(reminder.priority)}
+                        />
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* AI Suggestions */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                AI-förslag
+              </Typography>
+              
+              {aiAssistant.suggestions.length === 0 ? (
+                <Alert severity="info">
+                  Klicka på "Få förslag" för personliga rekommendationer
+                </Alert>
+              ) : (
+                <List>
+                  {aiAssistant.suggestions.map((suggestion) => (
+                    <ListItem key={suggestion.id} divider>
+                      <ListItemIcon>
+                        {getImpactIcon(suggestion.impact)}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={suggestion.title}
+                        secondary={
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">
+                              {suggestion.description}
+                            </Typography>
+                            <Box display="flex" gap={1} mt={1}>
+                              <Chip 
+                                label={suggestion.category} 
+                                size="small" 
+                                variant="outlined"
+                              />
+                              <Chip 
+                                label={`${suggestion.priority} prioritet`} 
+                                size="small" 
+                                color={getPriorityColor(suggestion.priority)}
+                              />
+                              <Chip 
+                                label={`${suggestion.impact} påverkan`} 
+                                size="small" 
+                                variant="outlined"
+                              />
+                            </Box>
+                          </Box>
+                        }
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Workflow Analysis */}
+        {aiAssistant.workflowAnalysis && (
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Arbetsflödesanalys
+                </Typography>
+                
+                <Box mb={3}>
+                  <Typography variant="body1" paragraph>
+                    {aiAssistant.workflowAnalysis.summary}
+                  </Typography>
+                  
+                  <Box display="flex" alignItems="center" gap={2} mb={2}>
+                    <Typography variant="body2">Effektivitet:</Typography>
+                    <LinearProgress 
+                      variant="determinate" 
+                      value={aiAssistant.workflowAnalysis.efficiency} 
+                      sx={{ flexGrow: 1, height: 8, borderRadius: 4 }}
+                    />
+                    <Typography variant="body2" fontWeight="bold">
+                      {aiAssistant.workflowAnalysis.efficiency}%
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Insikter
+                    </Typography>
+                    <List dense>
+                      {aiAssistant.workflowAnalysis.insights.map((insight, index) => (
+                        <ListItem key={index}>
+                          <ListItemIcon>
+                            <Psychology color="primary" fontSize="small" />
+                          </ListItemIcon>
+                          <ListItemText 
+                            primary={insight}
+                            primaryTypographyProps={{ variant: 'body2' }}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Grid>
+                  
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Rekommendationer
+                    </Typography>
+                    <List dense>
+                      {aiAssistant.workflowAnalysis.suggestions.map((suggestion, index) => (
+                        <ListItem key={index}>
+                          <ListItemIcon>
+                            <Lightbulb color="warning" fontSize="small" />
+                          </ListItemIcon>
+                          <ListItemText 
+                            primary={suggestion}
+                            primaryTypographyProps={{ variant: 'body2' }}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
+      </Grid>
+
+      {/* Create Reminder Dialog */}
+      <Dialog 
+        open={openReminderDialog} 
+        onClose={() => setOpenReminderDialog(false)}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>
-          Skapa Påminnelse
-          <IconButton
-            sx={{ position: 'absolute', right: 8, top: 8 }}
-            onClick={() => setShowReminderDialog(false)}
-          >
-            <Close />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          <Stack spacing={2}>
+        <DialogTitle>Skapa ny påminnelse</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 1 }}>
             <TextField
               fullWidth
               label="Titel"
-              value={newReminder.title}
-              onChange={(e) => setNewReminder(prev => ({ ...prev, title: e.target.value }))}
+              value={reminderForm.title}
+              onChange={(e) => setReminderForm({...reminderForm, title: e.target.value})}
+              margin="normal"
             />
-            
             <TextField
               fullWidth
               label="Beskrivning"
               multiline
               rows={3}
-              value={newReminder.description}
-              onChange={(e) => setNewReminder(prev => ({ ...prev, description: e.target.value }))}
+              value={reminderForm.description}
+              onChange={(e) => setReminderForm({...reminderForm, description: e.target.value})}
+              margin="normal"
             />
-            
             <TextField
               fullWidth
-              label="Datum och tid"
+              label="Förfallodatum"
               type="datetime-local"
-              value={newReminder.dueDate}
-              onChange={(e) => setNewReminder(prev => ({ ...prev, dueDate: e.target.value }))}
+              value={reminderForm.dueDate}
+              onChange={(e) => setReminderForm({...reminderForm, dueDate: e.target.value})}
+              margin="normal"
               InputLabelProps={{ shrink: true }}
             />
-            
-            <TextField
-              fullWidth
-              label="Prioritet"
-              select
-              value={newReminder.priority}
-              onChange={(e) => setNewReminder(prev => ({ ...prev, priority: e.target.value }))}
-              SelectProps={{ native: true }}
-            >
-              <option value="low">Låg</option>
-              <option value="medium">Medium</option>
-              <option value="high">Hög</option>
-            </TextField>
-            
-            <TextField
-              fullWidth
-              label="Kategori"
-              select
-              value={newReminder.category}
-              onChange={(e) => setNewReminder(prev => ({ ...prev, category: e.target.value }))}
-              SelectProps={{ native: true }}
-            >
-              <option value="general">Allmänt</option>
-              <option value="meeting">Möte</option>
-              <option value="deadline">Deadline</option>
-              <option value="personal">Personligt</option>
-            </TextField>
-          </Stack>
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Prioritet</InputLabel>
+              <Select
+                value={reminderForm.priority}
+                onChange={(e) => setReminderForm({...reminderForm, priority: e.target.value})}
+                label="Prioritet"
+              >
+                <MenuItem value="low">Låg</MenuItem>
+                <MenuItem value="medium">Medium</MenuItem>
+                <MenuItem value="high">Hög</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowReminderDialog(false)}>
+          <Button onClick={() => setOpenReminderDialog(false)}>
             Avbryt
           </Button>
-          <Button
-            onClick={createReminder}
+          <Button 
+            onClick={handleCreateReminder}
             variant="contained"
-            disabled={!newReminder.title || !newReminder.dueDate}
+            disabled={!reminderForm.title.trim()}
           >
-            Skapa Påminnelse
+            Skapa
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog 
+        open={openSettingsDialog} 
+        onClose={() => setOpenSettingsDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>AI-Assistent inställningar</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 1 }}>
+            <FormControlLabel
+              control={<Switch defaultChecked />}
+              label="Aktivera smarta påminnelser"
+            />
+            <FormControlLabel
+              control={<Switch defaultChecked />}
+              label="Automatisk arbetsflödesanalys"
+            />
+            <FormControlLabel
+              control={<Switch defaultChecked />}
+              label="Personliga förslag"
+            />
+            <FormControlLabel
+              control={<Switch />}
+              label="Experimentella funktioner"
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenSettingsDialog(false)}>
+            Stäng
+          </Button>
+          <Button variant="contained">
+            Spara
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,17 +1,20 @@
 import React from 'react';
 import Chart from 'react-apexcharts';
 import { useTheme } from '@mui/material/styles';
-import { Stack, Typography, Avatar, Fab } from '@mui/material';
-import { IconArrowDownRight, IconCurrencyDollar } from '@tabler/icons';
+import { Stack, Typography, Avatar, Fab, Button } from '@mui/material';
+import { IconArrowUpRight, IconFileText } from '@tabler/icons';
+import { useNavigate } from 'react-router-dom';
 
 import DashboardCard from '../../shared/DashboardCard';
 
 const MonthlyEarnings = () => {
+    const navigate = useNavigate();
+    
     // chart color
     const theme = useTheme();
-    const secondary = theme.palette.secondary.main;
-    const secondarylight = theme.palette.secondary.light;
-    const errorlight = theme.palette.error.light;
+    const primary = theme.palette.primary.main;
+    const primarylight = theme.palette.primary.light;
+    const successlight = theme.palette.success.light;
 
     // chart
     const optionscolumnchart = {
@@ -33,7 +36,7 @@ const MonthlyEarnings = () => {
             width: 2,
         },
         fill: {
-            colors: [secondarylight],
+            colors: [primarylight],
             type: 'solid',
             opacity: 0.05,
         },
@@ -50,17 +53,17 @@ const MonthlyEarnings = () => {
     const seriescolumnchart = [
         {
             name: '',
-            color: secondary,
-            data: [25, 66, 20, 40, 12, 58, 20],
+            color: primary,
+            data: [15, 25, 18, 32, 28, 35, 42],
         },
     ];
 
     return (
         <DashboardCard
-            title="Monthly Earnings"
+            title="CV Generator"
             action={
-                <Fab color="secondary" size="medium">
-                    <IconCurrencyDollar width={24} />
+                <Fab color="primary" size="medium">
+                    <IconFileText width={24} />
                 </Fab>
             }
             footer={
@@ -69,19 +72,28 @@ const MonthlyEarnings = () => {
         >
             <>
                 <Typography variant="h3" fontWeight="700" mt="-20px">
-                    $6,820
+                    234
                 </Typography>
                 <Stack direction="row" spacing={1} my={1} alignItems="center">
-                    <Avatar sx={{ bgcolor: errorlight, width: 27, height: 27 }}>
-                        <IconArrowDownRight width={20} color="#FA896B" />
+                    <Avatar sx={{ bgcolor: successlight, width: 27, height: 27 }}>
+                        <IconArrowUpRight width={20} color="#39B69A" />
                     </Avatar>
                     <Typography variant="subtitle2" fontWeight="600">
-                        +9%
+                        +15%
                     </Typography>
                     <Typography variant="subtitle2" color="textSecondary">
-                        last year
+                        CV:n skapade denna månad
                     </Typography>
                 </Stack>
+                <Button 
+                    variant="contained" 
+                    color="primary" 
+                    fullWidth 
+                    sx={{ mt: 2 }}
+                    onClick={() => navigate('/apps/cv-generator')}
+                >
+                    Skapa ditt CV nu
+                </Button>
             </>
         </DashboardCard>
     );

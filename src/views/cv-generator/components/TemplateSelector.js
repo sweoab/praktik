@@ -17,438 +17,380 @@ import {
 const templates = [
   {
     id: 'modern',
-    name: 'Modern Professional',
-    description: 'Clean, modern design with sections clearly separated and professional styling',
+    name: 'Professional Modern',
+    description: 'Clean och professionell design med moderna element',
     preview: 'modern-preview',
-    features: ['Profile Picture', 'Progress Bars for Skills', 'Clean Typography', 'Color Accents'],
-    color: '#1976d2',
-    colorName: 'Blå',
+    features: ['Profilbild', 'Färgaccenter', 'Tydlig layout', 'ATS-vänlig'],
+    color: '#2563eb',
+    colorName: 'Professional Blue',
   },
   {
     id: 'minimal',
-    name: 'Minimal Clean',
-    description: 'Simple, elegant design focusing on content with minimal visual elements',
+    name: 'Elegant Minimal',
+    description: 'Minimalistisk design som fokuserar på innehållet',
     preview: 'minimal-preview',
-    features: ['Centered Layout', 'Simple Typography', 'Skill Tags', 'Clean Lines'],
-    color: '#424242',
-    colorName: 'Grå',
-  },
-  {
-    id: 'creative-blue',
-    name: 'Kreativ Blå',
-    description: 'Kreativ design med blå accenter och visuella element',
-    preview: 'creative-blue-preview',
-    features: ['Kreativ Layout', 'Blå Färgschema', 'Visuella Element', 'Modern Typography'],
-    color: '#2196f3',
-    colorName: 'Ljusblå',
-  },
-  {
-    id: 'creative-green',
-    name: 'Naturlig Grön',
-    description: 'Miljövänlig och naturlig design med gröna accenter',
-    preview: 'creative-green-preview',
-    features: ['Naturliga Färger', 'Grön Accent', 'Organisk Layout', 'Miljötema'],
-    color: '#4caf50',
-    colorName: 'Grön',
-  },
-  {
-    id: 'creative-purple',
-    name: 'Lila Innovation',
-    description: 'Innovativ design med lila färgschema för kreativa roller',
-    preview: 'creative-purple-preview',
-    features: ['Lila Gradient', 'Kreativ Layout', 'Innovation Focus', 'Modern Design'],
-    color: '#9c27b0',
-    colorName: 'Lila',
+    features: ['Ren design', 'Fokus på text', 'Elegant typografi', 'Tidlös stil'],
+    color: '#475569',
+    colorName: 'Elegant Grey',
   },
   {
     id: 'executive-navy',
-    name: 'Executive Marinblå',
-    description: 'Sofistikerad design i marinblått för ledningspositioner',
+    name: 'Executive',
+    description: 'Sofistikerad design för ledande positioner',
     preview: 'executive-navy-preview',
-    features: ['Marinblå Färg', 'Executive Style', 'Premium Layout', 'Business Focus'],
-    color: '#1a237e',
-    colorName: 'Marinblå',
+    features: ['Auktoritativ', 'Premium känsla', 'Business-fokus', 'Konservativ'],
+    color: '#1e40af',
+    colorName: 'Executive Navy',
   },
   {
-    id: 'tech-orange',
-    name: 'Tech Orange',
-    description: 'Energisk design med orange accenter för tech-roller',
-    preview: 'tech-orange-preview',
-    features: ['Orange Accenter', 'Tech-fokus', 'Dynamisk Layout', 'Modern Style'],
-    color: '#ff5722',
-    colorName: 'Orange',
+    id: 'creative-teal',
+    name: 'Creative Professional',
+    description: 'Kreativ men professionell design för designyrken',
+    preview: 'creative-teal-preview',
+    features: ['Kreativ layout', 'Visuell balans', 'Modern design', 'Kreativt uttryck'],
+    color: '#0d9488',
+    colorName: 'Creative Teal',
   },
   {
-    id: 'elegant-rose',
-    name: 'Elegant Rosa',
-    description: 'Elegant design med rosa färgschema för service och vård',
-    preview: 'elegant-rose-preview',
-    features: ['Rosa Färgpalett', 'Elegant Typography', 'Mjuk Design', 'Vårdande Känsla'],
-    color: '#e91e63',
-    colorName: 'Rosa',
+    id: 'tech-slate',
+    name: 'Tech Modern',
+    description: 'Modern design optimerad för tech-roller',
+    preview: 'tech-slate-preview',
+    features: ['Tech-fokus', 'Modern stil', 'Strukturerad', 'Innovativ'],
+    color: '#475569',
+    colorName: 'Tech Slate',
   },
   {
-    id: 'finance-teal',
-    name: 'Finance Teal',
-    description: 'Professionell design i teal för finans och ekonomi',
-    preview: 'finance-teal-preview',
-    features: ['Teal Färgschema', 'Finans-fokus', 'Stabil Design', 'Pålitlig Känsla'],
-    color: '#009688',
-    colorName: 'Teal',
-  },
-  {
-    id: 'artistic-indigo',
-    name: 'Konstnärlig Indigo',
-    description: 'Konstnärlig design med indigo för kreativa yrken',
-    preview: 'artistic-indigo-preview',
-    features: ['Indigo Palette', 'Artistisk Layout', 'Kreativ Expression', 'Unik Design'],
-    color: '#3f51b5',
-    colorName: 'Indigo',
-  },
-  {
-    id: 'startup-amber',
-    name: 'Startup Amber',
-    description: 'Energisk startup-design med amber färg',
-    preview: 'startup-amber-preview',
-    features: ['Amber Accenter', 'Startup Vibe', 'Dynamisk Layout', 'Entreprenörsanda'],
-    color: '#ffc107',
-    colorName: 'Amber',
-  },
-  {
-    id: 'luxury-gold',
-    name: 'Lyxig Guld',
-    description: 'Premium design med guldaccenter för lyxbranscher',
-    preview: 'luxury-gold-preview',
-    features: ['Guld Accenter', 'Lyx Design', 'Premium Känsla', 'Elegant Style'],
-    color: '#f57c00',
-    colorName: 'Guld',
-  },
-  {
-    id: 'healthcare-cyan',
-    name: 'Vård Cyan',
-    description: 'Lugnande design i cyan för vårdyrken',
-    preview: 'healthcare-cyan-preview',
-    features: ['Cyan Färgschema', 'Vårdande Design', 'Lugn Känsla', 'Medicinsk Focus'],
-    color: '#00bcd4',
-    colorName: 'Cyan',
-  },
-  {
-    id: 'education-lime',
-    name: 'Utbildning Lime',
-    description: 'Frisk design i lime för utbildningsområdet',
-    preview: 'education-lime-preview',
-    features: ['Lime Accenter', 'Utbildnings-fokus', 'Frisk Design', 'Energigivande'],
-    color: '#8bc34a',
-    colorName: 'Lime',
-  },
-  {
-    id: 'corporate-grey',
-    name: 'Företag Grå',
-    description: 'Klassisk företagsdesign i grått för traditionella roller',
-    preview: 'corporate-grey-preview',
-    features: ['Grå Färgschema', 'Företags Style', 'Klassisk Design', 'Professionell'],
-    color: '#607d8b',
-    colorName: 'Blågrå',
-  },
-  {
-    id: 'gradient-sunset',
-    name: 'Solnedgång Gradient',
-    description: 'Modern gradient design med solnedgångsfärger',
-    preview: 'gradient-sunset-preview',
-    features: ['Gradient Bakgrund', 'Solnedgång Färger', 'Modern Design', 'Visuell Impact'],
-    color: 'linear-gradient(135deg, #ff6b6b, #ffd93d)',
-    colorName: 'Gradient',
-  },
-  {
-    id: 'dark-theme',
-    name: 'Mörkt Tema',
-    description: 'Elegant mörk design för en modern look',
-    preview: 'dark-theme-preview',
-    features: ['Mörk Bakgrund', 'Ljus Text', 'Modern Style', 'Tech Vibe'],
-    color: '#212121',
-    colorName: 'Mörk',
-  },
-  {
-    id: 'pastel-mint',
-    name: 'Pastell Mint',
-    description: 'Mjuk pastell design i mint för en lugn känsla',
-    preview: 'pastel-mint-preview',
-    features: ['Pastell Färger', 'Mint Accent', 'Mjuk Design', 'Harmonisk'],
-    color: '#a8e6cf',
-    colorName: 'Pastell Mint',
-  },
-  {
-    id: 'bold-red',
-    name: 'Modig Röd',
-    description: 'Kraftfull design i rött för ledarskapsroller',
-    preview: 'bold-red-preview',
-    features: ['Röd Accent', 'Kraftfull Design', 'Ledarskap Focus', 'Bold Typography'],
-    color: '#d32f2f',
-    colorName: 'Röd',
-  },
-  {
-    id: 'vintage-brown',
-    name: 'Vintage Brun',
-    description: 'Klassisk vintage design i bruna toner',
-    preview: 'vintage-brown-preview',
-    features: ['Vintage Style', 'Bruna Toner', 'Klassisk Design', 'Tidlös Känsla'],
-    color: '#8d6e63',
-    colorName: 'Brun',
+    id: 'finance-green',
+    name: 'Finance Professional',
+    description: 'Stabil och pålitlig design för finansbranschen',
+    preview: 'finance-green-preview',
+    features: ['Stabil design', 'Traditionell', 'Pålitlig känsla', 'Konservativ'],
+    color: '#059669',
+    colorName: 'Finance Green',
   },
 ];
 
 const TemplateSelector = ({ selectedTemplate, onChange }) => {
   const renderTemplatePreview = (template) => {
-    // Allmän preview för alla templates med färganpassning
-    const isGradient = template.color.includes('gradient');
-    const isDark = template.id === 'dark-theme';
-    
     const previewStyle = {
-      p: 2, 
-      height: 200, 
+      p: 3, 
+      height: 280, 
       overflow: 'hidden',
-      background: isGradient ? template.color : '#fff',
-      color: isDark ? '#fff' : '#333',
-      border: `3px solid ${isGradient ? 'transparent' : template.color}`,
-      borderRadius: 2,
+      background: '#ffffff',
+      color: '#1f2937',
+      border: `2px solid ${template.color}`,
+      borderRadius: 3,
       position: 'relative',
-      '&::before': isGradient ? {
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '20px',
-        background: template.color,
-        borderRadius: '4px 4px 0 0'
-      } : {}
+      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+      transition: 'all 0.3s ease',
+      '&:hover': {
+        transform: 'translateY(-4px)',
+        boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+      }
     };
 
     return (
-      <Paper elevation={1} sx={previewStyle}>
-        {/* Färgindikator */}
+      <Paper elevation={0} sx={previewStyle}>
+        {/* Template Header */}
         <Box 
           sx={{ 
             position: 'absolute',
-            top: 8,
-            right: 8,
-            width: 20,
-            height: 20,
-            background: isGradient ? 'rgba(255,255,255,0.9)' : template.color,
-            borderRadius: '50%',
-            border: '2px solid rgba(255,255,255,0.8)',
-            ...(isGradient && {
-              background: template.color,
-              border: '2px solid #fff'
-            })
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 8,
+            background: template.color,
+            borderRadius: '12px 12px 0 0'
           }} 
         />
         
-        {/* CV Header */}
-        <Box display="flex" alignItems="center" mb={1}>
+        {/* CV Header Simulation */}
+        <Box display="flex" alignItems="center" mt={2} mb={3}>
           <Avatar 
             sx={{ 
-              width: 24, 
-              height: 24, 
-              mr: 1, 
-              bgcolor: template.color.includes('gradient') ? '#1976d2' : template.color,
-              border: isDark ? '1px solid #fff' : 'none'
+              width: 32, 
+              height: 32, 
+              mr: 2, 
+              bgcolor: template.color,
+              border: `2px solid ${template.color}`,
+              fontSize: '14px',
+              fontWeight: 600
             }} 
-          />
+          >
+            JS
+          </Avatar>
           <Box>
             <Typography 
-              variant="caption" 
-              fontWeight="bold"
-              sx={{ color: isDark ? '#fff' : '#333' }}
+              variant="subtitle2" 
+              fontWeight="700"
+              sx={{ color: '#1f2937', lineHeight: 1.2 }}
             >
-              Anna Svensson
+              Johan Svensson
             </Typography>
             <Typography 
               variant="caption" 
-              display="block" 
-              sx={{ color: isDark ? '#ccc' : 'text.secondary' }}
+              sx={{ color: '#64748b', fontWeight: 500 }}
             >
-              {template.id.includes('tech') ? 'Tech Lead' : 
+              {template.id.includes('tech') ? 'Senior Developer' : 
                template.id.includes('finance') ? 'Financial Analyst' :
-               template.id.includes('creative') ? 'UX Designer' :
-               template.id.includes('healthcare') ? 'Sjuksköterska' :
-               template.id.includes('education') ? 'Lärare' :
+               template.id.includes('creative') ? 'UX/UI Designer' :
+               template.id.includes('executive') ? 'Senior Manager' :
                'Projektledare'}
             </Typography>
           </Box>
         </Box>
 
-        {/* Accent Line */}
-        <Box 
-          sx={{ 
-            height: 4, 
-            background: isGradient ? 'rgba(255,255,255,0.8)' : template.color, 
-            mb: 1, 
-            borderRadius: 2,
-            opacity: isDark ? 0.8 : 1
-          }} 
-        />
-
         {/* Content Sections */}
-        <Typography 
-          variant="caption" 
-          display="block" 
-          mb={1}
-          sx={{ 
-            color: isGradient || isDark ? 'rgba(255,255,255,0.9)' : template.color,
-            fontWeight: 600
-          }}
-        >
-          Profil
-        </Typography>
-        <Box sx={{ height: 2, bgcolor: isDark ? 'rgba(255,255,255,0.3)' : 'grey.300', mb: 1, width: '80%' }} />
-        <Box sx={{ height: 2, bgcolor: isDark ? 'rgba(255,255,255,0.3)' : 'grey.300', mb: 1, width: '60%' }} />
-
-        <Typography 
-          variant="caption" 
-          display="block" 
-          mb={1}
-          sx={{ 
-            color: isGradient || isDark ? 'rgba(255,255,255,0.9)' : template.color,
-            fontWeight: 600
-          }}
-        >
-          Arbetslivserfarenhet
-        </Typography>
-        <Box sx={{ height: 2, bgcolor: isDark ? 'rgba(255,255,255,0.3)' : 'grey.300', mb: 0.5, width: '70%' }} />
-        <Box sx={{ height: 2, bgcolor: isDark ? 'rgba(255,255,255,0.3)' : 'grey.300', mb: 1, width: '50%' }} />
-
-        <Typography 
-          variant="caption" 
-          display="block" 
-          mb={1}
-          sx={{ 
-            color: isGradient || isDark ? 'rgba(255,255,255,0.9)' : template.color,
-            fontWeight: 600
-          }}
-        >
-          Färdigheter
-        </Typography>
-
-        {/* Skills Progress Bars */}
-        <Box display="flex" gap={0.5} mb={1}>
-          <Box 
+        <Box mb={2}>
+          <Typography 
+            variant="caption" 
+            fontWeight="700"
             sx={{ 
-              height: 8, 
-              background: template.color.includes('gradient') ? 'rgba(255,255,255,0.8)' : template.color, 
-              width: 20, 
-              borderRadius: 1,
-              opacity: isDark ? 0.8 : 1
-            }} 
-          />
-          <Box 
-            sx={{ 
-              height: 8, 
-              background: template.color.includes('gradient') ? 'rgba(255,255,255,0.6)' : `${template.color}80`, 
-              width: 15, 
-              borderRadius: 1,
-              opacity: isDark ? 0.6 : 1
-            }} 
-          />
-          <Box 
-            sx={{ 
-              height: 8, 
-              background: template.color.includes('gradient') ? 'rgba(255,255,255,0.4)' : `${template.color}60`, 
-              width: 18, 
-              borderRadius: 1,
-              opacity: isDark ? 0.4 : 1
-            }} 
-          />
+              color: template.color,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              fontSize: '0.7rem'
+            }}
+          >
+            PROFESSIONELL PROFIL
+          </Typography>
+          <Box sx={{ mt: 1 }}>
+            <Box sx={{ height: 3, bgcolor: '#e2e8f0', mb: 1, width: '100%', borderRadius: 1 }} />
+            <Box sx={{ height: 3, bgcolor: '#e2e8f0', mb: 1, width: '85%', borderRadius: 1 }} />
+            <Box sx={{ height: 3, bgcolor: '#e2e8f0', mb: 2, width: '70%', borderRadius: 1 }} />
+          </Box>
         </Box>
 
-        {/* Template Style Indicator */}
+        <Box mb={2}>
+          <Typography 
+            variant="caption" 
+            fontWeight="700"
+            sx={{ 
+              color: template.color,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              fontSize: '0.7rem'
+            }}
+          >
+            ARBETSLIVSERFARENHET
+          </Typography>
+          <Box sx={{ mt: 1 }}>
+            <Box display="flex" alignItems="center" mb={1}>
+              <Box 
+                sx={{ 
+                  width: 6, 
+                  height: 6, 
+                  bgcolor: template.color, 
+                  borderRadius: '50%', 
+                  mr: 1 
+                }} 
+              />
+              <Box sx={{ height: 2, bgcolor: '#e2e8f0', width: '60%', borderRadius: 1 }} />
+            </Box>
+            <Box display="flex" alignItems="center" mb={1}>
+              <Box 
+                sx={{ 
+                  width: 6, 
+                  height: 6, 
+                  bgcolor: `${template.color}80`, 
+                  borderRadius: '50%', 
+                  mr: 1 
+                }} 
+              />
+              <Box sx={{ height: 2, bgcolor: '#e2e8f0', width: '55%', borderRadius: 1 }} />
+            </Box>
+          </Box>
+        </Box>
+
+        <Box>
+          <Typography 
+            variant="caption" 
+            fontWeight="700"
+            sx={{ 
+              color: template.color,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              fontSize: '0.7rem'
+            }}
+          >
+            KOMPETENSER
+          </Typography>
+          <Box sx={{ mt: 1 }}>
+            <Box display="flex" gap={1} mb={1}>
+              <Box 
+                sx={{ 
+                  height: 6, 
+                  background: template.color, 
+                  width: 40, 
+                  borderRadius: 1
+                }} 
+              />
+              <Box 
+                sx={{ 
+                  height: 6, 
+                  background: `${template.color}60`, 
+                  width: 30, 
+                  borderRadius: 1
+                }} 
+              />
+              <Box 
+                sx={{ 
+                  height: 6, 
+                  background: `${template.color}40`, 
+                  width: 35, 
+                  borderRadius: 1
+                }} 
+              />
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Color indicator */}
         <Box
           sx={{
             position: 'absolute',
-            bottom: 8,
-            left: 8,
-            fontSize: '10px',
-            color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)',
-            fontStyle: 'italic'
+            bottom: 12,
+            right: 12,
+            width: 16,
+            height: 16,
+            background: template.color,
+            borderRadius: '50%',
+            border: '2px solid white',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
           }}
-        >
-          {template.colorName}
-        </Box>
+        />
       </Paper>
     );
   };
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
-        Choose Template
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Select a template that best fits your profession and style
-      </Typography>
+      <Box mb={4}>
+        <Typography variant="h5" fontWeight={600} gutterBottom sx={{ color: 'text.primary' }}>
+          Välj CV-mall
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+          Välj en professionell mall som passar din bransch och stil
+        </Typography>
+        
+        {/* Professional indicator */}
+        <Box 
+          sx={{ 
+            p: 2, 
+            bgcolor: 'primary.50', 
+            borderRadius: 2, 
+            border: '1px solid',
+            borderColor: 'primary.200'
+          }}
+        >
+          <Typography variant="body2" color="primary.main" fontWeight={500}>
+            💼 Alla mallar är optimerade för ATS-system och professionella standarder
+          </Typography>
+        </Box>
+      </Box>
 
       <Grid container spacing={3}>
         {templates.map((template) => (
-          <Grid item xs={12} md={6} key={template.id}>
+          <Grid item xs={12} md={6} lg={4} key={template.id}>
             <Card 
               variant="outlined"
               sx={{ 
                 position: 'relative',
-                border: selectedTemplate === template.id ? 2 : 1,
+                border: selectedTemplate === template.id ? 3 : 1,
                 borderColor: selectedTemplate === template.id ? 'primary.main' : 'divider',
-                opacity: template.comingSoon ? 0.7 : 1,
+                borderRadius: 3,
+                overflow: 'hidden',
+                transition: 'all 0.3s ease',
+                cursor: 'pointer',
+                '&:hover': {
+                  borderColor: 'primary.main',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 12px 40px rgba(0,0,0,0.1)',
+                },
+                ...(selectedTemplate === template.id && {
+                  boxShadow: '0 8px 32px rgba(37, 99, 235, 0.2)',
+                })
               }}
             >
               <CardActionArea 
-                onClick={() => !template.comingSoon && onChange(template.id)}
-                disabled={template.comingSoon}
+                onClick={() => onChange(template.id)}
+                sx={{ height: '100%' }}
               >
-                <CardContent>
+                <CardContent sx={{ p: 0 }}>
                   {/* Selection Indicator */}
                   {selectedTemplate === template.id && (
                     <Box 
                       sx={{ 
                         position: 'absolute', 
-                        top: 8, 
-                        right: 8, 
-                        zIndex: 1 
+                        top: 12, 
+                        right: 12, 
+                        zIndex: 2,
+                        bgcolor: 'primary.main',
+                        borderRadius: '50%',
+                        p: 0.5
                       }}
                     >
-                      <CheckCircleIcon color="primary" />
+                      <CheckCircleIcon sx={{ color: 'white', fontSize: 20 }} />
                     </Box>
                   )}
 
                   {/* Template Preview */}
-                  <Box mb={2}>
+                  <Box>
                     {renderTemplatePreview(template)}
                   </Box>
 
                   {/* Template Info */}
-                  <Box>
-                    <Box display="flex" alignItems="center" gap={1} mb={1}>
-                      <Typography variant="h6" component="h3">
-                        {template.name}
-                      </Typography>
-                      {template.comingSoon && (
-                        <Chip label="Coming Soon" size="small" color="default" />
-                      )}
-                    </Box>
+                  <Box sx={{ p: 3 }}>
+                    <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: 'text.primary' }}>
+                      {template.name}
+                    </Typography>
                     
-                    <Typography variant="body2" color="text.secondary" paragraph>
+                    <Typography variant="body2" color="text.secondary" paragraph sx={{ mb: 2 }}>
                       {template.description}
                     </Typography>
 
-                    {/* Features */}
-                    <Box display="flex" flexWrap="wrap" gap={0.5}>
+                    {/* Clean Features */}
+                    <Box display="flex" flexWrap="wrap" gap={1}>
                       {template.features.map((feature, index) => (
                         <Chip
                           key={index}
                           label={feature}
                           size="small"
                           variant="outlined"
-                          sx={{ fontSize: '0.7rem' }}
+                          sx={{ 
+                            fontSize: '0.75rem',
+                            borderColor: 'divider',
+                            color: 'text.secondary',
+                            '&:hover': {
+                              borderColor: template.color,
+                              color: template.color,
+                            }
+                          }}
                         />
                       ))}
+                    </Box>
+
+                    {/* Color name indicator */}
+                    <Box 
+                      sx={{ 
+                        mt: 2, 
+                        pt: 2, 
+                        borderTop: '1px solid',
+                        borderColor: 'divider'
+                      }}
+                    >
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          color: 'text.secondary',
+                          fontWeight: 500,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
+                        }}
+                      >
+                        {template.colorName}
+                      </Typography>
                     </Box>
                   </Box>
                 </CardContent>
@@ -458,11 +400,20 @@ const TemplateSelector = ({ selectedTemplate, onChange }) => {
         ))}
       </Grid>
 
-      {/* Template Info */}
-      <Box mt={3} p={2} bgcolor="background.paper" borderRadius={1} border="1px solid" borderColor="divider">
-        <Typography variant="body2" color="text.secondary">
-          <strong>Note:</strong> You can switch between templates at any time. Your content will be automatically 
-          adapted to the selected template style. More templates are coming soon!
+      {/* Professional Note */}
+      <Box 
+        mt={4} 
+        p={3} 
+        sx={{ 
+          bgcolor: 'grey.50', 
+          borderRadius: 2, 
+          border: '1px solid',
+          borderColor: 'grey.200'
+        }}
+      >
+        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+          <strong>Professionell rådgivning:</strong> Du kan byta mall när som helst utan att förlora ditt innehåll. 
+          Alla mallar är designade enligt moderna rekryteringsstandarder och fungerar med ATS-system.
         </Typography>
       </Box>
     </Box>

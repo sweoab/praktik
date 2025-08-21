@@ -12,7 +12,6 @@ const BlankLayout = lazyLoad(() => import('../layouts/blank/BlankLayout'));
 
 /* ***Test Component**** */
 const TestComponent = lazyLoad(() => import('../views/test/TestComponent'));
-const AITestComponent = lazyLoad(() => import('../components/test/AITestComponent'));
 
 /* ****Pages***** */
 const ModernDash = lazyLoad(() => import('../views/dashboard/Modern'));
@@ -20,7 +19,6 @@ const EcommerceDash = lazyLoad(() => import('../views/dashboard/Ecommerce'));
 
 /* ****Apps***** */
 const Chats = lazyLoad(() => import('../views/apps/chat/Chat'));
-const AIChat = lazyLoad(() => import('../views/apps/ai-chat/AIChat'));
 const Notes = lazyLoad(() => import('../views/apps/notes/Notes'));
 const Calendar = lazyLoad(() => import('../views/apps/calendar/BigCalendar'));
 const Email = lazyLoad(() => import('../views/apps/email/Email'));
@@ -183,7 +181,6 @@ const Router = [
       { path: '/dashboards/ecommerce', exact: true, element: <EcommerceDash /> },
       { path: '/apps/chats', element: <Chats /> },
       { path: '/apps/communication', element: <Communication /> },
-      { path: '/apps/ai-chat', element: <AIChat /> },
       { path: '/apps/notes', element: <Notes /> },
       { path: '/apps/calendar', element: <Calendar /> },
       { path: '/apps/email', element: <Email /> },

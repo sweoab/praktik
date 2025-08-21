@@ -63,7 +63,8 @@
     "register": "Register",
     "forgotPassword": "Forgot Password",
     "twoSteps": "Two Steps",
-    "maintenance": "Maintenance"
+    "maintenance": "Maintenance",
+    "aiChat": "AI Assistant"
   },
   "cvGenerator": {
     "title": "CV Generator",

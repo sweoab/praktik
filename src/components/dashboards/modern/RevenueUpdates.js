@@ -17,7 +17,7 @@ const RevenueUpdates = () => {
   // chart color
   const theme = useTheme();
   const primary = theme.palette.primary.main;
-  const secondary = theme.palette.secondary.main;
+  const success = theme.palette.success.main;
 
   // chart
   const optionscolumnchart = {
@@ -31,7 +31,7 @@ const RevenueUpdates = () => {
       height: 370,
       stacked: true,
     },
-    colors: [primary, secondary],
+    colors: [primary, success],
     plotOptions: {
       bar: {
         horizontal: false,
@@ -62,9 +62,9 @@ const RevenueUpdates = () => {
       },
     },
     yaxis: {
-      min: -5,
-      max: 5,
-      tickAmount: 4,
+      min: 0,
+      max: 50,
+      tickAmount: 5,
     },
     xaxis: {
       categories: ['16/08', '17/08', '18/08', '19/08', '20/08', '21/08', '22/08'],
@@ -79,19 +79,19 @@ const RevenueUpdates = () => {
   };
   const seriescolumnchart = [
     {
-      name: 'Eanings this month',
-      data: [1.5, 2.7, 2.2, 3.6, 1.5, 1.0],
+      name: 'Nya registreringar',
+      data: [12, 18, 15, 24, 19, 16, 21],
     },
     {
-      name: 'Expense this month',
-      data: [-1.8, -1.1, -2.5, -1.5, -0.6, -1.8],
+      name: 'Aktiva användare',
+      data: [8, 14, 11, 19, 15, 12, 17],
     },
   ];
 
   return (
     (<DashboardCard
-      title="Revenue Updates"
-      subtitle="Overview of Profit"
+      title="Studentaktivitet"
+      subtitle="Översikt av användarengagemang"
       action={
         <CustomSelect
           labelId="month-dd"
@@ -100,9 +100,9 @@ const RevenueUpdates = () => {
           size="small"
           onChange={handleChange}
         >
-          <MenuItem value={1}>March 2025</MenuItem>
-          <MenuItem value={2}>Feb 2025</MenuItem>
-          <MenuItem value={3}>Jan 2025</MenuItem>
+          <MenuItem value={1}>Augusti 2025</MenuItem>
+          <MenuItem value={2}>Juli 2025</MenuItem>
+          <MenuItem value={3}>Juni 2025</MenuItem>
         </CustomSelect>
       }
     >
@@ -138,10 +138,10 @@ const RevenueUpdates = () => {
               </Box>
               <Box>
                 <Typography variant="h3" fontWeight="700">
-                  $63,489.50
+                  1,847
                 </Typography>
                 <Typography variant="subtitle2" color="textSecondary">
-                  Total Earnings
+                  Totala Studenter
                 </Typography>
               </Box>
             </Stack>
@@ -159,9 +159,9 @@ const RevenueUpdates = () => {
               ></Avatar>
               <Box>
                 <Typography variant="subtitle1" color="textSecondary">
-                  Earnings this month
+                  Nya registreringar denna månad
                 </Typography>
-                <Typography variant="h5">$48,820</Typography>
+                <Typography variant="h5">123</Typography>
               </Box>
             </Stack>
             <Stack direction="row" spacing={2} alignItems="flex-start">
@@ -170,21 +170,21 @@ const RevenueUpdates = () => {
                   width: 9,
                   mt: 1,
                   height: 9,
-                  bgcolor: secondary,
+                  bgcolor: success,
                   marginTop: '10px !important',
                   svg: { display: 'none' },
                 }}
               ></Avatar>
               <Box>
                 <Typography variant="subtitle1" color="textSecondary">
-                  Expense this month
+                  Aktiva användare denna månad
                 </Typography>
-                <Typography variant="h5">$26,498</Typography>
+                <Typography variant="h5">98</Typography>
               </Box>
             </Stack>
           </Stack>
           <Button color="primary" variant="contained" fullWidth>
-            View Full Report
+            Visa Detaljerad Rapport
           </Button>
         </Grid>
       </Grid>

@@ -11,39 +11,39 @@ import icon6 from '../../../assets/images/svgs/icon-speech-bubble.svg';
 
 const topcards = [
   {
-    icon: icon2,
-    title: 'Employees',
+    icon: icon3,
+    title: 'Praktikplatser',
     digits: '96',
     bgcolor: 'primary',
   },
   {
-    icon: icon3,
-    title: 'Clients',
-    digits: '3,650',
+    icon: icon2,
+    title: 'Studenter',
+    digits: '1,250',
     bgcolor: 'warning',
   },
   {
     icon: icon4,
-    title: 'Projects',
-    digits: '356',
+    title: 'Ansökningar',
+    digits: '432',
     bgcolor: 'secondary',
   },
   {
     icon: icon5,
-    title: 'Events',
-    digits: '696',
+    title: 'Företag',
+    digits: '67',
     bgcolor: 'error',
   },
   {
     icon: icon6,
-    title: 'Payroll',
-    digits: '$96k',
+    title: 'Aktiva Praktik',
+    digits: '89',
     bgcolor: 'success',
   },
   {
     icon: icon1,
-    title: 'Reports',
-    digits: '59',
+    title: 'Nya idag',
+    digits: '12',
     bgcolor: 'info',
   },
 ];

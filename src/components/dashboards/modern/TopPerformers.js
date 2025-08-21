@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import DashboardCard from '../../shared/DashboardCard';
 import CustomSelect from '../../forms/theme-elements/CustomSelect';
 import {
@@ -14,40 +15,89 @@ import {
   Chip,
   TableContainer,
   Stack,
+  Button,
+  IconButton,
 } from '@mui/material';
-import TopPerformerData from './TopPerformerData';
-
-const performers = TopPerformerData;
+import { IconExternalLink, IconBuilding } from '@tabler/icons';
+import { getInternships } from '../../../api/internships/InternshipsData';
 
 const TopPerformers = () => {
-  // for select
-  const [month, setMonth] = React.useState('1');
+  const [month, setMonth] = useState('1');
+  const [internships, setInternships] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchInternships();
+  }, []);
+
+  const fetchInternships = async () => {
+    try {
+      setLoading(true);
+      const response = await getInternships({ 
+        limit: 5,
+        status: 'active'
+      });
+      
+      if (response?.internships) {
+        setInternships(response.internships);
+      }
+    } catch (error) {
+      console.error('Error fetching internships:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (event) => {
     setMonth(event.target.value);
   };
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'active': return 'success';
+      case 'pending': return 'warning';
+      case 'closed': return 'error';
+      default: return 'default';
+    }
+  };
+
+  const formatSalary = (salary) => {
+    if (!salary) return 'Ej angivet';
+    return `${salary.toLocaleString('sv-SE')} kr`;
+  };
+
   return (
     <DashboardCard
-      title="Top Projects"
-      subtitle="Best Products"
+      title="Rekommenderade praktikplatser"
+      subtitle="Senaste tillgängliga praktikplatser"
       action={
-        <CustomSelect
-          labelId="month-dd"
-          id="month-dd"
-          size="small"
-          value={month}
-          onChange={handleChange}
-        >
-          <MenuItem value={1}>March 2025</MenuItem>
-          <MenuItem value={2}>April 2025</MenuItem>
-          <MenuItem value={3}>May 2025</MenuItem>
-        </CustomSelect>
+        <Stack direction="row" spacing={1}>
+          <CustomSelect
+            labelId="month-dd"
+            id="month-dd"
+            size="small"
+            value={month}
+            onChange={handleChange}
+          >
+            <MenuItem value={1}>Senaste</MenuItem>
+            <MenuItem value={2}>Populära</MenuItem>
+            <MenuItem value={3}>Nya denna vecka</MenuItem>
+          </CustomSelect>
+          <Button 
+            component={Link} 
+            to="/apps/internships" 
+            size="small" 
+            variant="outlined"
+            endIcon={<IconExternalLink size={14} />}
+          >
+            Visa alla
+          </Button>
+        </Stack>
       }
     >
       <TableContainer>
         <Table
-          aria-label="simple table"
+          aria-label="praktikplatser tabell"
           sx={{
             whiteSpace: 'nowrap',
           }}
@@ -55,71 +105,112 @@ const TopPerformers = () => {
           <TableHead>
             <TableRow>
               <TableCell>
-                <Typography variant="subtitle2" fontWeight={600}>Assigned</Typography>
+                <Typography variant="subtitle2" fontWeight={600}>Företag</Typography>
               </TableCell>
               <TableCell>
-                <Typography variant="subtitle2" fontWeight={600}>Project</Typography>
+                <Typography variant="subtitle2" fontWeight={600}>Position</Typography>
               </TableCell>
               <TableCell>
-                <Typography variant="subtitle2" fontWeight={600}>Priority</Typography>
+                <Typography variant="subtitle2" fontWeight={600}>Plats</Typography>
               </TableCell>
               <TableCell>
-                <Typography variant="subtitle2" fontWeight={600}>Budget</Typography>
+                <Typography variant="subtitle2" fontWeight={600}>Status</Typography>
+              </TableCell>
+              <TableCell>
+                <Typography variant="subtitle2" fontWeight={600}>Lön</Typography>
+              </TableCell>
+              <TableCell align="center">
+                <Typography variant="subtitle2" fontWeight={600}>Åtgärd</Typography>
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {performers.map((basic) => (
-              <TableRow key={basic.id}>
-                <TableCell>
-                  <Stack direction="row" spacing={2}>
-                    <Avatar src={basic.imgsrc} alt={basic.imgsrc} sx={{ width: 40, height: 40 }} />
-                    <Box>
-                      <Typography variant="subtitle2" fontWeight={600}>
-                        {basic.name}
-                      </Typography>
-                      <Typography color="textSecondary" fontSize="12px" variant="subtitle2">
-                        {basic.post}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </TableCell>
-                <TableCell>
-                  <Typography color="textSecondary" variant="subtitle2" fontWeight={400}>
-                    {basic.pname}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  {/* <Chip chipcolor={basic.status == 'Active' ? 'success' : basic.status == 'Pending' ? 'warning' : basic.status == 'Completed' ? 'primary' : basic.status == 'Cancel' ? 'error' : 'secondary'} */}
-                  <Chip
-                    sx={{
-                      bgcolor:
-                        basic.status === 'High'
-                          ? (theme) => theme.palette.error.light
-                          : basic.status === 'Medium'
-                          ? (theme) => theme.palette.warning.light
-                          : basic.status === 'Low'
-                          ? (theme) => theme.palette.success.light
-                          : (theme) => theme.palette.secondary.light,
-                      color:
-                        basic.status === 'High'
-                          ? (theme) => theme.palette.error.main
-                          : basic.status === 'Medium'
-                          ? (theme) => theme.palette.warning.main
-                          : basic.status === 'Low'
-                          ? (theme) => theme.palette.success.main
-                          : (theme) => theme.palette.secondary.main,
-                      borderRadius: '8px',
-                    }}
-                    size="small"
-                    label={basic.status}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Typography variant="subtitle2">${basic.budget}k</Typography>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  <Typography color="textSecondary">Laddar praktikplatser...</Typography>
                 </TableCell>
               </TableRow>
-            ))}
+            ) : internships.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  <Typography color="textSecondary">Inga praktikplatser hittades</Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              internships.map((internship) => (
+                <TableRow key={internship.id} hover>
+                  <TableCell>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Avatar 
+                        sx={{ 
+                          width: 40, 
+                          height: 40, 
+                          bgcolor: 'primary.light',
+                          color: 'primary.main'
+                        }}
+                      >
+                        <IconBuilding size={20} />
+                      </Avatar>
+                      <Box>
+                        <Typography variant="subtitle2" fontWeight={600}>
+                          {internship.company_name || 'Företag AB'}
+                        </Typography>
+                        <Typography color="textSecondary" fontSize="12px" variant="subtitle2">
+                          {internship.company_location || internship.location}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="subtitle2" fontWeight={500}>
+                      {internship.title}
+                    </Typography>
+                    <Typography color="textSecondary" fontSize="12px">
+                      {internship.field_of_study}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography color="textSecondary" variant="subtitle2" fontWeight={400}>
+                      {internship.location}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      sx={{
+                        bgcolor: (theme) => 
+                          internship.status === 'active' 
+                            ? theme.palette.success.light
+                            : theme.palette.warning.light,
+                        color: (theme) => 
+                          internship.status === 'active'
+                            ? theme.palette.success.main
+                            : theme.palette.warning.main,
+                        borderRadius: '8px',
+                        textTransform: 'capitalize'
+                      }}
+                      size="small"
+                      label={internship.status === 'active' ? 'Öppen' : 'Stängd'}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="subtitle2">
+                      {formatSalary(internship.salary)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <IconButton 
+                      component={Link} 
+                      to={`/apps/internships/${internship.id}`}
+                      size="small"
+                      color="primary"
+                    >
+                      <IconExternalLink size={16} />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>

@@ -33,7 +33,7 @@ import NotificationsPanel from '@/components/apps/communication/NotificationsPan
 import DocumentsPanel from '@/components/apps/communication/DocumentsPanel';
 import MeetingsPanel from '@/components/apps/communication/MeetingsPanel';
 import UsersPanel from '@/components/apps/communication/UsersPanel';
-import AIAssistantPanel from '@/components/apps/communication/AIAssistantPanel';
+import AIAssistantPanel from '../../../components/apps/communication/AIAssistantPanel';
 
 function TabPanel({ children, value, index, ...other }) {
   return (

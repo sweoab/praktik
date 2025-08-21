@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 
 import {
   ListItemText,
@@ -10,7 +10,11 @@ import {
   ListItemIcon,
   Box,
   Typography,
+  Button,
 } from '@mui/material';
+import {
+  Edit as EditIcon,
+} from '@mui/icons-material';
 
 import { EmailContext } from "@/context/EmailContext";
 import EmailCompose from './EmailCompose';
@@ -27,13 +31,11 @@ import {
 } from '@tabler/icons-react';
 import { CustomizerContext } from '@/context/CustomizerContext';
 
-
 const EmailFilter = () => {
-
   const { isBorderRadius } = useContext(CustomizerContext);
   const br = `${isBorderRadius}px`;
-
   const { setFilter, filter } = useContext(EmailContext);
+  const [composeOpen, setComposeOpen] = useState(false);
 
   const handleFilterClick = (filterName) => {
     setFilter(filterName);
@@ -76,7 +78,7 @@ const EmailFilter = () => {
     },
     {
       id: 1,
-      filterbyTitle: 'Sort By',
+      filterbyTitle: 'Sortera efter',
     },
     {
       id: 7,
@@ -90,42 +92,45 @@ const EmailFilter = () => {
       icon: IconAlertCircle,
       color: 'inherit',
     },
-    {
-      id: 9,
-      divider: true,
-    },
-    {
-      id: 13,
-      filterbyTitle: 'Labels',
-    },
-    {
-      id: 10,
-      name: 'Promotional',
-      icon: IconFolder,
-      color: 'primary.main',
-    },
-    {
-      id: 11,
-      name: 'Social',
-      icon: IconFolder,
-      color: 'error.main',
-    },
-    {
-      id: 12,
-      name: 'Health',
-      icon: IconFolder,
-      color: 'success.main',
-    },
   ];
 
   return (
     <>
       <Box>
-        {/* ------------------------------------------- */}
-        {/* Email compose */}
-        {/* ------------------------------------------- */}
-        <EmailCompose />
+        {/* Modern Compose Button */}
+        <Box p={3} pb={1}>
+          <Button 
+            variant="contained" 
+            fullWidth 
+            startIcon={<EditIcon />}
+            onClick={() => setComposeOpen(true)}
+            sx={{ 
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              fontWeight: 600,
+              py: 1.5,
+              borderRadius: 3,
+              textTransform: 'none',
+              fontSize: '1rem',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a67d8 0%, #667eea 100%)',
+                transform: 'translateY(-1px)',
+                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
+              },
+              transition: 'all 0.2s ease-in-out'
+            }}
+          >
+            Skriv meddelande
+          </Button>
+        </Box>
+
+        {/* Compose Dialog */}
+        <EmailCompose 
+          open={composeOpen} 
+          onClose={() => setComposeOpen(false)} 
+        />
       </Box>
+
       <List>
         <Scrollbar sx={{ height: { lg: 'calc(100vh - 100px)', md: '100vh' }, maxHeight: '800px' }}>
           {filterData.map((item) => {
@@ -138,12 +143,13 @@ const EmailFilter = () => {
                   pl={5.5}
                   fontWeight={600}
                   key={item.id}
+                  sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem' }}
                 >
                   {item.filterbyTitle}
                 </Typography>
               );
             } else if (item.divider) {
-              return <Divider key={item.id} />;
+              return <Divider key={item.id} sx={{ my: 1 }} />;
             }
 
             return (
@@ -153,18 +159,34 @@ const EmailFilter = () => {
                   px: '20px',
                   mx: 3,
                   borderRadius: br,
+                  '&:hover': {
+                    backgroundColor: 'action.hover',
+                  },
+                  '&.Mui-selected': {
+                    backgroundColor: 'primary.lighter',
+                    color: 'primary.main',
+                    '&:hover': {
+                      backgroundColor: 'primary.lighter',
+                    }
+                  }
                 }}
                 selected={filter === `${item.name}`}
                 onClick={() => handleFilterClick(item.name)}
                 key={`${item.id}${item.name}`}
               >
-                {/* ------------------------------------------- */}
-                {/* If list to filter */}
-                {/* ------------------------------------------- */}
                 <ListItemIcon sx={{ minWidth: '30px', color: item.color }}>
                   <item.icon stroke="1.5" size={19} />
                 </ListItemIcon>
-                <ListItemText sx={{ textTransform: 'capitalize' }}>{item.name}</ListItemText>
+                <ListItemText 
+                  sx={{ 
+                    textTransform: 'capitalize',
+                    '& .MuiTypography-root': {
+                      fontWeight: filter === item.name ? 600 : 400
+                    }
+                  }}
+                >
+                  {item.name}
+                </ListItemText>
               </ListItemButton>
             );
           })}

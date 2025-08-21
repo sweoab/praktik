@@ -20,6 +20,7 @@ import {
   ExpandLess as ExpandLessIcon,
 } from '@mui/icons-material';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import BlogWidgets from '../../../components/dashboards/modern/BlogWidgets';
 
 const degreeTypes = [
   'High School Diploma',
@@ -300,6 +301,11 @@ const EducationForm = ({ data, onChange }) => {
           </Typography>
         </Box>
       )}
+
+      {/* Blog Section */}
+      <Box mt={4}>
+        <BlogWidgets />
+      </Box>
     </Box>
   );
 };

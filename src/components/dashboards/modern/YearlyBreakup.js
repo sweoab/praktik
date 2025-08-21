@@ -12,7 +12,8 @@ const YearlyBreakup = () => {
   // chart color
   const theme = useTheme();
   const primary = theme.palette.primary.main;
-  const primarylight = theme.palette.primary.light;
+  const warning = theme.palette.warning.main;
+  const success = theme.palette.success.main;
   const successlight = theme.palette.success.light;
 
   // chart
@@ -26,7 +27,7 @@ const YearlyBreakup = () => {
       },
       height: 155,
     },
-    colors: [primary, primarylight, '#F9F9FD'],
+    colors: [success, warning, primary],
     plotOptions: {
       pie: {
         startAngle: 0,
@@ -60,42 +61,50 @@ const YearlyBreakup = () => {
       },
     ],
   };
-  const seriescolumnchart = [38, 40, 25];
+  const seriescolumnchart = [52, 35, 13];
 
   return (
-    <DashboardCard title="Yearly Breakup">
+    <DashboardCard title="Utskickade Ansökningar">
       <Grid container spacing={3}>
         {/* column */}
         <Grid size={7}>
           <Typography variant="h3" fontWeight="700">
-            $36,358
+            1,247
           </Typography>
           <Stack direction="row" spacing={1} mt={1} alignItems="center">
             <Avatar sx={{ bgcolor: successlight, width: 27, height: 27 }}>
               <IconArrowUpLeft width={20} color="#39B69A" />
             </Avatar>
             <Typography variant="subtitle2" fontWeight="600">
-              +9%
+              +23%
             </Typography>
             <Typography variant="subtitle2" color="textSecondary">
-              last year
+              från förra året
             </Typography>
           </Stack>
-          <Stack spacing={3} mt={5} direction="row">
+          <Stack spacing={2} mt={5} direction="column">
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Avatar
+                sx={{ width: 9, height: 9, bgcolor: success, svg: { display: 'none' } }}
+              ></Avatar>
+              <Typography variant="subtitle2" color="textSecondary">
+                Svarade (52%)
+              </Typography>
+            </Stack>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Avatar
+                sx={{ width: 9, height: 9, bgcolor: warning, svg: { display: 'none' } }}
+              ></Avatar>
+              <Typography variant="subtitle2" color="textSecondary">
+                Pending (35%)
+              </Typography>
+            </Stack>
             <Stack direction="row" spacing={1} alignItems="center">
               <Avatar
                 sx={{ width: 9, height: 9, bgcolor: primary, svg: { display: 'none' } }}
               ></Avatar>
               <Typography variant="subtitle2" color="textSecondary">
-                2025
-              </Typography>
-            </Stack>
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Avatar
-                sx={{ width: 9, height: 9, bgcolor: primarylight, svg: { display: 'none' } }}
-              ></Avatar>
-              <Typography variant="subtitle2" color="textSecondary">
-                2024
+                Utvecklade (13%)
               </Typography>
             </Stack>
           </Stack>

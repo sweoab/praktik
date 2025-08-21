@@ -251,172 +251,202 @@ const CVGenerator = () => {
 
   return (
     <PageContainer title={t('cvGenerator.title')} description={t('cvGenerator.description')}>
-      <Box>
-        {/* Header with actions */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-          <Typography variant="h4" component="h1">
-            {t('cvGenerator.title')}
-          </Typography>
-          <Box display="flex" gap={1}>
-            <LanguageSwitcher variant="menu" />
-            <Button
-              variant="outlined"
-              startIcon={<SaveIcon />}
-              onClick={handleSave}
-              size={isMobile ? 'small' : 'medium'}
-            >
-              {t('common.save')}
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<PreviewIcon />}
-              onClick={() => setShowPreview(!showPreview)}
-              size={isMobile ? 'small' : 'medium'}
-            >
-              {showPreview ? t('common.edit') : t('common.preview')}
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<PrintIcon />}
-              onClick={handlePrint}
-              size={isMobile ? 'small' : 'medium'}
-            >
-              {t('common.print')}
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={isExportingPDF ? <CircularProgress size={20} color="inherit" /> : <DownloadIcon />}
-              onClick={handleExportPDF}
-              disabled={isExportingPDF}
-              size={isMobile ? 'small' : 'medium'}
-            >
-              {isExportingPDF ? t('common.exporting') : t('common.exportPDF')}
-            </Button>
-            {/* Debug Test Button */}
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={async () => {
-                console.log('🧪 Kör omfattande PDF export tester...');
-                const results = await runAllPDFTests();
-                
-                if (results.fullCVTest) {
-                  setSaveStatus(`✅ ${t('cvGenerator.allTestsPassed')}`);
-                } else {
-                  setSaveStatus(`⚠️ ${t('cvGenerator.someTestsFailed')}`);
-                }
-                setTimeout(() => setSaveStatus(''), 5000);
-              }}
-              size="small"
-              sx={{ ml: 1 }}
-            >
-              Test All PDF
-            </Button>
-            {/* Diagnostik Button */}
-            <Button
-              variant="outlined"
-              color="info"
-              onClick={async () => {
-                console.log('🔍 Kör PDF diagnostik...');
-                const diagnostics = await runQuickPDFDiagnostics();
-                
-                if (diagnostics.success) {
-                  setSaveStatus(`✅ ${t('cvGenerator.pdfSystemWorking')}: ${diagnostics.summary}`);
-                } else {
-                  setSaveStatus(`⚠️ ${t('cvGenerator.pdfProblems')}: ${diagnostics.summary}. Se konsolen för detaljer.`);
-                }
-                setTimeout(() => setSaveStatus(''), 8000);
-              }}
-              size="small"
-              sx={{ ml: 1 }}
-            >
-              Diagnostik
-            </Button>
-            {/* Snabbtest Button */}
-            <Button
-              variant="outlined"
-              color="success"
-              onClick={async () => {
-                console.log('⚡ Kör snabb PDF test...');
-                const result = await quickPDFTest();
-                
-                if (result.success) {
-                  setSaveStatus(`✅ ${t('cvGenerator.quickTestSuccess')}: ${result.fileName}`);
-                } else {
-                  setSaveStatus(`❌ ${t('cvGenerator.quickTestFailed')}: ${result.error}`);
-                }
-                setTimeout(() => setSaveStatus(''), 6000);
-              }}
-              size="small"
-              sx={{ ml: 1 }}
-            >
-              Quick Test
-            </Button>
+      <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
+        {/* Professional Header */}
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: 3, 
+            mb: 3, 
+            borderRadius: 2,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white'
+          }}
+        >
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Box>
+              <Typography variant="h4" component="h1" fontWeight={600} gutterBottom>
+                {t('cvGenerator.title')}
+              </Typography>
+              <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
+                Skapa ett professionellt CV på några minuter
+              </Typography>
+            </Box>
+            
+            {/* Clean Action Buttons */}
+            <Box display="flex" gap={1.5} alignItems="center">
+              <LanguageSwitcher variant="menu" />
+              
+              <Button
+                variant="contained"
+                startIcon={<SaveIcon />}
+                onClick={handleSave}
+                size={isMobile ? 'small' : 'medium'}
+                sx={{ 
+                  bgcolor: 'rgba(255,255,255,0.2)', 
+                  color: 'white',
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                  backdropFilter: 'blur(10px)'
+                }}
+              >
+                {t('common.save')}
+              </Button>
+              
+              <Button
+                variant="contained"
+                startIcon={<PreviewIcon />}
+                onClick={() => setShowPreview(!showPreview)}
+                size={isMobile ? 'small' : 'medium'}
+                sx={{ 
+                  bgcolor: 'rgba(255,255,255,0.2)', 
+                  color: 'white',
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                  backdropFilter: 'blur(10px)'
+                }}
+              >
+                {showPreview ? t('common.edit') : t('common.preview')}
+              </Button>
+              
+              <Button
+                variant="contained"
+                startIcon={isExportingPDF ? <CircularProgress size={20} color="inherit" /> : <DownloadIcon />}
+                onClick={handleExportPDF}
+                disabled={isExportingPDF}
+                size={isMobile ? 'small' : 'medium'}
+                sx={{ 
+                  bgcolor: 'rgba(255,255,255,0.95)', 
+                  color: 'primary.main',
+                  '&:hover': { bgcolor: 'white' },
+                  fontWeight: 600
+                }}
+              >
+                {isExportingPDF ? t('common.exporting') : t('common.exportPDF')}
+              </Button>
+            </Box>
           </Box>
-        </Box>
+        </Paper>
 
-        {/* Save status alert */}
+        {/* Clean Status Alert */}
         {saveStatus && (
-          <Alert severity="success" sx={{ mb: 2 }}>
+          <Alert 
+            severity="success" 
+            sx={{ 
+              mb: 3, 
+              borderRadius: 2,
+              '& .MuiAlert-message': { fontWeight: 500 }
+            }}
+          >
             {saveStatus}
           </Alert>
         )}
 
         <Grid container spacing={3}>
-          {/* Form Section */}
+          {/* Modern Form Section */}
           {!showPreview && (
             <Grid xs={12} lg={8}>
-              <DashboardCard>
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  borderRadius: 3, 
+                  overflow: 'hidden',
+                  border: '1px solid',
+                  borderColor: 'divider'
+                }}
+              >
                 <Box>
-                  {/* Tabs */}
-                  <Tabs
-                    value={activeTab}
-                    onChange={handleTabChange}
-                    variant={isMobile ? 'scrollable' : 'standard'}
-                    scrollButtons="auto"
-                    sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}
-                  >
-                    {tabContent.map((tab, index) => (
-                      <Tab key={index} label={tab.label} />
-                    ))}
-                  </Tabs>
+                  {/* Clean Tabs */}
+                  <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'grey.50' }}>
+                    <Tabs
+                      value={activeTab}
+                      onChange={handleTabChange}
+                      variant={isMobile ? 'scrollable' : 'standard'}
+                      scrollButtons="auto"
+                      sx={{ 
+                        '& .MuiTab-root': {
+                          fontWeight: 500,
+                          textTransform: 'none',
+                          fontSize: '0.95rem',
+                          py: 2
+                        },
+                        '& .Mui-selected': {
+                          color: 'primary.main',
+                          fontWeight: 600
+                        }
+                      }}
+                    >
+                      {tabContent.map((tab, index) => (
+                        <Tab key={index} label={tab.label} />
+                      ))}
+                    </Tabs>
+                  </Box>
 
-                  {/* Tab Content */}
-                  <Box>{tabContent[activeTab].component}</Box>
+                  {/* Tab Content with padding */}
+                  <Box sx={{ p: 4 }}>
+                    {tabContent[activeTab].component}
+                  </Box>
                 </Box>
-              </DashboardCard>
+              </Paper>
             </Grid>
           )}
 
-          {/* Preview Section */}
+          {/* Clean Preview Section */}
           <Grid xs={12} lg={showPreview ? 12 : 4}>
-            <DashboardCard>
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                borderRadius: 3,
+                border: '1px solid',
+                borderColor: 'divider',
+                overflow: 'hidden'
+              }}
+            >
               <Box>
-                <Typography variant="h6" gutterBottom>
-                  {t('common.preview')}
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <Box ref={cvPreviewRef}>
+                <Box 
+                  sx={{ 
+                    p: 3, 
+                    bgcolor: 'grey.50', 
+                    borderBottom: '1px solid',
+                    borderColor: 'divider'
+                  }}
+                >
+                  <Typography variant="h6" fontWeight={600} color="text.primary">
+                    {t('common.preview')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                    Se hur ditt CV kommer att se ut
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ p: 2 }} ref={cvPreviewRef}>
                   <CVPreview cvData={cvData} />
                 </Box>
               </Box>
-            </DashboardCard>
+            </Paper>
           </Grid>
         </Grid>
 
-        {/* Floating Action Button for mobile */}
+        {/* Modern Floating Action Button */}
         {isMobile && !showPreview && (
           <Fab
             color="primary"
             aria-label="preview"
-            sx={{ position: 'fixed', bottom: 16, right: 16 }}
+            sx={{ 
+              position: 'fixed', 
+              bottom: 24, 
+              right: 24,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+              '&:hover': {
+                transform: 'scale(1.05)',
+                transition: 'transform 0.2s ease-in-out'
+              }
+            }}
             onClick={() => setShowPreview(true)}
           >
             <PreviewIcon />
           </Fab>
         )}
 
-        {/* PDF Export Dialog */}
+        {/* Clean PDF Export Dialog */}
         <PDFExportDialog
           open={showPDFDialog}
           onClose={handleClosePDFDialog}

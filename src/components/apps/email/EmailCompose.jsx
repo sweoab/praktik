@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Button,
   Box,
@@ -10,85 +10,304 @@ import {
   TextField,
   DialogContent,
   DialogActions,
-  DialogContentText,
+  Typography,
+  Autocomplete,
+  Alert,
+  CircularProgress,
+  IconButton,
+  Chip,
 } from '@mui/material';
+import {
+  Close as CloseIcon,
+  Send as SendIcon,
+  AttachFile as AttachFileIcon,
+} from '@mui/icons-material';
 import CustomFormLabel from '@/components/forms/theme-elements/CustomFormLabel';
-
+import { EmailContext } from '@/context/EmailContext';
+import { postFetcher, getFetcher } from '@/api/globalFetcher';
 
 const Transition = React.forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
+const EmailCompose = ({ open, onClose }) => {
+  const [formData, setFormData] = useState({
+    to: '',
+    subject: '',
+    content: '',
+    isImportant: false,
+  });
+  const [contacts, setContacts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loadingContacts, setLoadingContacts] = useState(false);
 
-const EmailCompose = () => {
-  const [open, setOpen] = useState(false);
-  const handleClickOpen = () => {
-    setOpen(true);
+  const { emails, setEmails, sendEmail } = useContext(EmailContext);
+
+  // Load contacts when component mounts
+  useEffect(() => {
+    if (open) {
+      loadContacts();
+      // Reset form when opening
+      setFormData({
+        to: '',
+        subject: '',
+        content: '',
+        isImportant: false,
+      });
+      setError('');
+      setSuccess('');
+    }
+  }, [open]);
+
+  const loadContacts = async () => {
+    try {
+      setLoadingContacts(true);
+      const response = await getFetcher('/api/email/contacts');
+      if (response.status === 200) {
+        setContacts(response.data.map(contact => ({
+          label: `${contact.firstName} ${contact.lastName} (${contact.email})`,
+          email: contact.email,
+          name: `${contact.firstName} ${contact.lastName}`
+        })));
+      }
+    } catch (error) {
+      console.error('Error loading contacts:', error);
+      setError('Failed to load contacts');
+    } finally {
+      setLoadingContacts(false);
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    // Clear errors when user starts typing
+    if (error) setError('');
+  };
+
+  const handleSend = async () => {
+    // Validation
+    if (!formData.to) {
+      setError('Mottagare är obligatorisk');
+      return;
+    }
+    if (!formData.subject) {
+      setError('Ämne är obligatoriskt');
+      return;
+    }
+    if (!formData.content) {
+      setError('Meddelande kan inte vara tomt');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+
+      // Use the sendEmail function from context
+      const result = await sendEmail(formData.to, formData.subject, formData.content);
+
+      if (result.success) {
+        setSuccess('E-post skickat framgångsrikt!');
+        
+        // Reset form
+        setFormData({
+          to: '',
+          subject: '',
+          content: '',
+          isImportant: false
+        });
+
+        // Close dialog after success
+        setTimeout(() => {
+          setSuccess('');
+          onClose();
+        }, 2000);
+      } else {
+        setError(result.error || 'Misslyckades att skicka e-post');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+      setError('Ett oväntat fel uppstod');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {
-    setOpen(false);
+    if (!loading) {
+      onClose();
+      setError('');
+      setSuccess('');
+    }
   };
 
   return (
-    <Box>
-      {/* ------------------------------------------- */}
-      {/* Compose Email */}
-      {/* ------------------------------------------- */}
-      <Box p={3} pb={1}>
-        <Button variant="contained" fullWidth color="primary" onClick={handleClickOpen}>
-          Compose
-        </Button>
-      </Box>
-      {/* ------------------------------------------- */}
-      {/* Dialog for compose */}
-      {/* ------------------------------------------- */}
-      <Dialog
-        open={open}
-        TransitionComponent={Transition}
-        keepMounted
-        onClose={handleClose}
-        fullWidth
-        aria-labelledby="alert-dialog-slide-title"
-        aria-describedby="alert-dialog-slide-description"
+    <Dialog
+      open={open}
+      TransitionComponent={Transition}
+      keepMounted
+      onClose={handleClose}
+      fullWidth
+      maxWidth="md"
+      aria-labelledby="email-compose-title"
+    >
+      <DialogTitle 
+        id="email-compose-title" 
+        sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white'
+        }}
       >
-        <DialogTitle id="alert-dialog-slide-title" variant="h5">
-          Compose Mail
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-slide-description" component="div">
-            <CustomFormLabel htmlFor="to-text">To</CustomFormLabel>
-            <TextField id="to-text" fullWidth size="small" variant="outlined" />
-            <CustomFormLabel htmlFor="subject-text">Subject</CustomFormLabel>
-            <TextField id="subject-text" fullWidth size="small" variant="outlined" />
-            <CustomFormLabel htmlFor="message-text">Message</CustomFormLabel>
-            <TextField
-              id="message-text"
-              placeholder="Write a message"
-              multiline
-              fullWidth
-              rows={4}
-              variant="outlined"
+        <Typography variant="h6" fontWeight={600}>
+          Skriv nytt meddelande
+        </Typography>
+        <IconButton 
+          onClick={handleClose} 
+          disabled={loading}
+          sx={{ color: 'white' }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent sx={{ mt: 2 }}>
+        {/* Error Alert */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        {/* Success Alert */}
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {success}
+          </Alert>
+        )}
+
+        {/* To Field with Autocomplete */}
+        <Box mb={3}>
+          <CustomFormLabel htmlFor="to-field">Till *</CustomFormLabel>
+          <Autocomplete
+            id="to-field"
+            freeSolo
+            loading={loadingContacts}
+            options={contacts}
+            getOptionLabel={(option) => typeof option === 'string' ? option : option.label}
+            value={formData.to}
+            onInputChange={(event, newValue) => {
+              handleInputChange('to', newValue);
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                fullWidth
+                placeholder="namn@exempel.se eller välj från kontakter"
+                variant="outlined"
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {loadingContacts ? <CircularProgress size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
+            renderOption={(props, option) => (
+              <Box component="li" {...props}>
+                <Box>
+                  <Typography variant="body2" fontWeight={500}>
+                    {option.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {option.email}
+                  </Typography>
+                </Box>
+              </Box>
+            )}
+          />
+        </Box>
+
+        {/* Subject Field */}
+        <Box mb={3}>
+          <CustomFormLabel htmlFor="subject-field">Ämne *</CustomFormLabel>
+          <TextField
+            id="subject-field"
+            fullWidth
+            placeholder="Skriv ämnerad..."
+            variant="outlined"
+            value={formData.subject}
+            onChange={(e) => handleInputChange('subject', e.target.value)}
+          />
+        </Box>
+
+        {/* Message Field */}
+        <Box mb={3}>
+          <CustomFormLabel htmlFor="message-field">Meddelande *</CustomFormLabel>
+          <TextField
+            id="message-field"
+            placeholder="Skriv ditt meddelande här..."
+            multiline
+            fullWidth
+            rows={6}
+            variant="outlined"
+            value={formData.content}
+            onChange={(e) => handleInputChange('content', e.target.value)}
+          />
+        </Box>
+
+        {/* Options */}
+        <Box mb={2}>
+          <Box display="flex" gap={1} alignItems="center">
+            <Chip
+              label="Viktigt"
+              clickable
+              color={formData.isImportant ? "primary" : "default"}
+              variant={formData.isImportant ? "filled" : "outlined"}
+              onClick={() => handleInputChange('isImportant', !formData.isImportant)}
             />
-            <CustomFormLabel htmlFor="upload-text">Attachment</CustomFormLabel>
-            <TextField
-              type="file"
-              autoFocus
-              id="upload-text"
-              fullWidth
-              size="small"
-              variant="outlined"
-            />
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary" variant="contained">
-            Send
-          </Button>
-          <Button onClick={handleClose} color="secondary">
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+            <IconButton color="primary" disabled>
+              <AttachFileIcon />
+            </IconButton>
+            <Typography variant="caption" color="text.secondary">
+              Bilagor kommer snart
+            </Typography>
+          </Box>
+        </Box>
+      </DialogContent>
+
+      <DialogActions sx={{ p: 3, pt: 0 }}>
+        <Button 
+          onClick={handleClose} 
+          disabled={loading}
+          sx={{ mr: 1 }}
+        >
+          Avbryt
+        </Button>
+        <Button 
+          onClick={handleSend} 
+          variant="contained" 
+          disabled={loading}
+          startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
+          sx={{ 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #5a67d8 0%, #667eea 100%)',
+            }
+          }}
+        >
+          {loading ? 'Skickar...' : 'Skicka'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
